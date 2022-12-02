@@ -18,6 +18,8 @@ Project for QRCODE generation API. The project comes with a quick HTML page for 
 - Downloads (that are finished and ready) will be listed after clicking the downloads page.
   If no downloads appear, then nothing is ready yet
 - The "Text Samples" option allows you to see samples of what scanned text will look like.
+- Once qrcodes have been generated and placed into a folder, a thread starts to zip this folder and this may take a good amount of time.
+ Once zipping completes, the zip file becomes available for download and the original folder is deleted leaving only the zip file.
 
 ### HOW IT WORKS
 Upon making a request, a folder named after the username you enter on the homepage will be created in the OUTPUT folder.
