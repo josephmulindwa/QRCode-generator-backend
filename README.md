@@ -18,3 +18,9 @@ Project for QRCODE generation API. The project comes with a quick HTML page for 
 - Downloads (that are finished and ready) will be listed after clicking the downloads page.
   If no downloads appear, then nothing is ready yet
 - The "Text Samples" option allows you to see samples of what scanned text will look like.
+
+### HOW IT WORKS
+Upon making a request, a folder named after the username you enter on the homepage will be created in the OUTPUT folder.
+All the requests for this username will be placed in this folder split into groups/zips/folders of a certain size.
+That size can be controlled internally by changing the value of `FOLDER_BATCH` inside "apiUtils.py".
+For example if FOLDER_BATCH = 100 and a user requests 300 QRcodes, they will end up with 3 folders/zip files each containing 100 QRcodes.
