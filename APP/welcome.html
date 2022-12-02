@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+    <!-- This is a standalone html file for the QRCode generator by Mulindwa Joseph -->
+    <head>
+        <title>QRCode Generator Home Page</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            #main-heading{
+                font-family: Arial;
+                text-align: center;
+            }
+
+            body{
+                background: mediumpurple;
+            }
+            .label-container{
+                margin: 0.2em;
+            }
+            .input-field{
+                border-radius: 2rem;
+                margin: 0.15em;
+            }
+            .clickable{
+                background: black;
+                color: white;
+                border-radius: 1.5em;
+                margin: 0.16em;
+                width: 8em;
+                height: 2em;
+            }
+            .clickable:hover{
+                background: orangered;
+                color : white;
+            }
+            button{
+                background: blue;
+            }
+
+            .column{
+                border-radius: 1.6em;
+                padding: 12px;
+                margin: 5px;
+                background-color: #eee4e4;
+            }
+
+            #main-column-1{
+                justify-self: center;
+            }
+
+            #main-column-2{
+                min-height: 16rem;
+                max-height: 18rem;
+                overflow: auto;
+            }
+            
+            #output-div{
+                overflow: auto;
+            }
+
+            @media screen and (max-width : 600px) {
+                .main-div{
+                    display:grid;
+                    grid-template-rows: auto auto;
+                    text-align: center;
+                }
+            }
+
+            @media not screen and (max-width: 600px){
+                .main-div{
+                    display: grid;
+                    grid-template-columns: auto auto;
+                    text-align: center;
+                }
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <h1 id="main-heading"><strong>QRCode Generator Home Page</strong></h1>
+        <h3><strong>This is a local improvisional PAGE.</strong></h3>
+        
+        <div class="main-div">
+            <!--first column-->
+            <div class="column" id="main-column-1">
+                <form id="mainform">
+                    <table>
+                        <tr>
+                            <td><label for="url"><strong>BASE URL :</strong></label></td>
+                            <td><input class="input-field" type="text" id="url" name="url" value='http://localhost:8000/' required></td>
+                        </tr>
+                        <tr>
+                            <td><label for="username"><strong>User name:</strong></label></td>
+                            <td><input class="input-field" type="text" id="user" name="user" required="true"></td>
+                        </tr>
+                        <tr>
+                            <td><label for="count"><strong>Number of QRCodes :</strong></label></td>
+                            <td><input class="input-field" type="number" id="count" name="count" min="1" value="1" required="true"></td>
+                        </tr>
+                        <tr>
+                            <td><label for="start"><strong>Starting Value :</strong></label><br></td>
+                            <td><input class="input-field" type="number" id="start" name="start" value="1" min="1" required="true"></td>
+                        </tr>
+                        <tr>
+                            <td><label for="length"><strong>Length of QRCode serial :</strong></label></td>
+                            <td><input class="input-field" type="number" id="length" name="length" min="1" value="1" required></td>
+                        </tr>
+                        <tr>
+                            <td><label for="pre_string"><strong>Pre String :</strong></label></td>
+                            <td><input class="input-field" type="text" id="pre_string" name="pre_string"></td>
+                        </tr>
+                        <tr>
+                            <td><label for="pro_string"><strong>Pro String :</strong></label></td>
+                            <td><input class="input-field" type="text" id="pro_string" name="pro_string"></td>
+                        </tr>
+                        <tr>
+                            <td><label for="overwrite"><strong>Overwite Existing files?</strong></label></td>
+                            <td><input type="checkbox" id="overwrite" name="overwrite" value="overwrite"></td>
+                        </tr>
+                    </table>
+                </form>
+                <div>
+                    <button class="clickable" onclick="send_data()">Submit</button>
+                    <button class="clickable" onclick="onCancelGeneration()">Cancel</button>
+                </div>
+            </div>
+
+            <!-- middle column -->
+            <div class="column" id="main-column-2">
+                <div>
+                    <button class="clickable" onclick="onRequestSample()">Text samples</button>
+                    <button class="clickable" onclick="onRequestProgress()">Progress</button>
+                    <button class="clickable" onclick="onRequestDownloads()">Downloads</button>
+                </div>
+                <div id="output-div"></div>
+            </div>
+        </div>
+
+        <!-- fetcher code -->
+        <script>
+            var BASE_URL;
+            var cancelButton = document.getElementById('cancel_button');
+            var outputDiv = document.getElementById('output-div');
+
+            function getMainFormData(){
+                var mainform = document.getElementById('mainform');
+                var userfield = mainform.user.value;
+                var countfield = mainform.count.value;
+                var startfield = mainform.start.value;
+                var lengthfield = mainform.length.value;
+                var pre_stringfield = mainform.pre_string.value;
+                var pro_stringfield = mainform.pro_string.value;
+                var overwriteCheckbox = document.getElementById('overwrite');
+                var overwritefield = overwriteCheckbox.checked;
+                var urlfield = mainform.url.value;
+                if (!urlfield.endsWith('/')){
+                    urlfield = urlfield + '/';
+                }
+                return [userfield, countfield, startfield, lengthfield, 
+                        pre_stringfield, pro_stringfield, overwritefield, urlfield];
+            }
+
+            function validateMainData(){
+                var mainformdata = getMainFormData();
+                var userfield = mainformdata[0];
+                var countfield = mainformdata[1];
+                var startfield = mainformdata[2];
+                var lengthfield = mainformdata[3];
+                var pre_stringfield = mainformdata[4];
+                var pro_stringfield = mainformdata[5];
+                var overwritefield = mainformdata[6];
+                var urlfield = mainformdata[7];
+                if (userfield == ''){ return false; }
+                if (countfield == '' || countfield < 1){ return false; }
+                if (startfield == '' || startfield < 1){ return false; }
+                if (lengthfield == ''){ return false; }
+                if(urlfield == ''){return false;}
+                return true;   
+            }
+
+            async function test_url(){
+                // checks if url is visible & gettable
+                var formdata = getMainFormData();
+                BASE_URL = '__NONE__';
+                var url = formdata[7];
+                try{
+                    let response = fetch(url, {method:"GET"});
+                    let res = await response;
+                    BASE_URL = url;
+                    console.log('URL ->', BASE_URL);
+                }catch(err){
+                    alert('Enter a valid BASE_URL; copy the current address in your browser and paste it in the base url field.');
+                    throw(err);
+                }
+            }
+
+            async function onCancelGeneration(){
+                var valid = validateMainData();
+                if (!valid){
+                    alert('Please, Fill all required fields');
+                    return;
+                }
+                var formdata = getMainFormData();
+                var uservalue = formdata[0];
+                await test_url();
+
+                try{
+                    let response = fetch( BASE_URL + 'cancel/'+uservalue, {method:'GET'});
+                    let res = await response;
+                    let result = await res.json();
+                    console.log('Result :', result);
+                    alert(result);
+                }catch(err){
+                    console.log(err);
+                }
+
+            }
+
+            async function onRequestDownloads(){
+                var valid = validateMainData();
+                if (!valid){
+                    alert('Please, Fill all required fields');
+                    return;
+                }
+                var formdata = getMainFormData();
+                var uservalue = formdata[0];
+                await test_url();
+
+                try{
+                    let response = fetch( BASE_URL + 'downloads/'+uservalue, {method:'GET'});
+                    let res = await response;
+                    let arr = await res.json(); // returns a list
+                    var liststring = '';
+                    for (var i=0; i<arr.length; i++){
+                        var s = '<a href='+BASE_URL+'download/'+arr[i][1]+'>'+
+                            arr[i][0]+'<a><br>';
+                        liststring += s;
+                    }
+                    outputDiv.innerHTML = liststring;
+                }catch(err){
+                    console.log(err);
+                }
+            }
+
+            async function onRequestProgress(){
+                var valid = validateMainData();
+                if (!valid){
+                    alert('Please, Fill all required fields');
+                    return;
+                }
+                var formdata = getMainFormData();
+                var uservalue = formdata[0];
+                await test_url();
+
+                try{
+                    let response = fetch( BASE_URL + 'progress/'+uservalue, {method:'GET'});
+                    let res = await response;
+                    let progress_data = await res.json();
+                    outputDiv.innerHTML = progress_data[0].toString()+'/'+ progress_data[1].toString().replace("\n", "<br>").replace("\n", "<br>");
+                }catch(err){
+                    console.log(err);
+                }
+            }
+            
+            async function onRequestSample(){
+                var valid = validateMainData();
+                if (!valid){
+                    alert('Please, Fill all required fields');
+                    return;
+                }
+                await test_url();
+                
+                var mainformdata = getMainFormData();
+                var uservalue = mainformdata[0];
+                var countvalue = mainformdata[1];
+                var startvalue = mainformdata[2];
+                var lengthvalue = mainformdata[3];
+                var pre_stringvalue = mainformdata[4];
+                var pro_stringvalue = mainformdata[5];
+                var overwritevalue = mainformdata[6];
+
+                var jsondata = {"user":uservalue, 
+                                "count":countvalue, 
+                                "start":startvalue, 
+                                "length":lengthvalue,
+                                "pre_string":pre_stringvalue,
+                                "pro_string":pro_stringvalue,
+                                "overwrite":overwritevalue
+                            };
+                
+                try{
+                    let response = fetch(
+                        BASE_URL + 'stringsample/', 
+                        {method:'POST', body:JSON.stringify(jsondata),
+                        headers: { "Content-type": "application/json; charset=UTF-8" }
+                    });
+                    let res = await response;
+                    let result = await res.json();
+                    outputDiv.innerHTML = result; //.replace('\n', '<br>').replace('\n', '<br>');
+                }catch(err){
+                    console.log(err);
+                }
+            }
+
+            async function send_data(){
+                var valid = validateMainData();
+                if (!valid){
+                    alert('Please, Fill all required fields');
+                    return;
+                }
+                await test_url();
+
+                var mainformdata = getMainFormData();
+                var uservalue = mainformdata[0];
+                var countvalue = mainformdata[1];
+                var startvalue = mainformdata[2];
+                var lengthvalue = mainformdata[3];
+                var pre_stringvalue = mainformdata[4];
+                var pro_stringvalue = mainformdata[5];
+                var overwritevalue = mainformdata[6];
+
+                var jsondata = {"user":uservalue, 
+                                "count":countvalue, 
+                                "start":startvalue, 
+                                "length":lengthvalue,
+                                "pre_string":pre_stringvalue,
+                                "pro_string":pro_stringvalue,
+                                "overwrite":overwritevalue
+                            };
+                
+                try{
+                    let response = fetch(
+                        BASE_URL + 'generate/', 
+                        {method:'POST', body:JSON.stringify(jsondata),
+                        headers: { "Content-type": "application/json; charset=UTF-8" }
+                    });
+                    let res = await response;
+                    let result = await res.json();
+                    console.log('Result :', result);
+                    alert(result);
+                }catch(err){
+                    console.log(err);
+                }
+            }
+        </script>
+    </body>
+
+</html>

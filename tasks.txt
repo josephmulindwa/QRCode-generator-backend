@@ -1,0 +1,6 @@
+-download-links generated as tokens -> generate-link >> db >> realrequest >> start download
+-delete profile
+-file write-lock
+-manually CANCEL oncrash?
+-status active
+-read from csv
