@@ -4,6 +4,7 @@ Backend for QR Code generator
 Project for QRCODE generation API. The project comes with a quick HTML page for testing purposes.
 
 ### Dependencies:
+- node.js
 - fastapi
 - uvicorn
 
