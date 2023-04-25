@@ -53,15 +53,16 @@ async def generate_codes(req : GenerateRequest):
     overwrite = (overwrite==1)
     
     username = utils.get_hash(user)
-    if apiutils.is_active(username):
+    if not overwrite and apiutils.is_active(username):
         msg =  "Requests for this user are still active!"
         return msg
     qrgen = apiutils.QRCodeGenerator(username)
     apiutils.add_active_request(username, qrgen)
 
-    generate_fn = qrgen.generate(start_number=start, limit=count, serial_length=length, pre_string=pre_string, pro_string=pre_string)
+    generate_fn = lambda : qrgen.generate(start_number=start, limit=count, serial_length=length, pre_string=pre_string, pro_string=pre_string)
     try:
-        thread = threading.Thread(target=generate_fn)
+        thread = threading.Thread(target=generate_fn, args=())
+        print("starting thread")
         thread.start()
         apiutils.log('{} : Generation started'.format(username))
         return 'Generation started.'

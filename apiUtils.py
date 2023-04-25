@@ -111,7 +111,7 @@ class QRCodeGenerator:
     def generate_qrcode(self, data):
         return generate_qrcode(data, self.version, self.error_correction, self.box_size, self.border)
     
-    def generate_qrcodes(self, start_number, end_number, serial_length, pre_string, pro_string, outfolder, with_csv=True):
+    def generate_qrcodes(self, start_number, end_number, serial_length, pre_string, pro_string, outfolder, with_csv=True, update_progress=False):
         """
         generates qrcodes and places them into specified folder
         start_number :
@@ -147,6 +147,8 @@ class QRCodeGenerator:
                     with open(csv_path, 'a') as fw:
                         fw.write(csv_data)
                     csv_data=""
+                if update_progress:
+                    self.progress+=1
             if len(csv_data) > 0:
                 with open(csv_path, 'a') as fw:
                     fw.write(csv_data)
@@ -174,8 +176,8 @@ class QRCodeGenerator:
             curr_end = im+next_limit
             state = self.generate_qrcodes(
                 start_number=im, end_number=curr_end, serial_length=serial_length, pre_string=pre_string,
-                pro_string=pro_string, outfolder=outfolder, with_csv=with_csv)
-            self.progress+=next_limit
+                pro_string=pro_string, outfolder=outfolder, with_csv=with_csv, update_progress=True)
+            # self.progress+=next_limit
             rem = limit-self.progress
             if not state:
                 break
@@ -213,7 +215,3 @@ class QRCodeGenerator:
         
     def is_complete(self):
         return self.total==self.progress  # and zipping is done
-
-qrgen = QRCodeGenerator(name="anil", folder_batch=6)
-qrgen.generate(start_number=1, limit=10, serial_length=9, pre_string="welcome", pro_string="home")
-print(qrgen.error_message)
