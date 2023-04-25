@@ -1,5 +1,4 @@
 import os
-import re
 import subprocess
 import shutil
 import threading
@@ -14,10 +13,7 @@ APP_FOLDER = 'APP'
 LOG_FILE = 'logs.txt'
 MAX_LOG_LINES = 100 # the maximum number of lines that can be logged
 CSV_FILE = 'qrcodes.csv'
-
-PROGRESS_FILE = 'progress.txt'
 FOLDER_BATCH = 20128 # 21216
-STATE_FILE = 'STATE.state'
 
 # db
 ACTIVE_OBJECTS = dict()
@@ -179,7 +175,7 @@ class QRCodeGenerator:
             state = self.generate_qrcodes(
                 start_number=im, end_number=curr_end, serial_length=serial_length, pre_string=pre_string,
                 pro_string=pro_string, outfolder=outfolder, with_csv=with_csv)
-            self.progress+=self.folder_batch
+            self.progress+=next_limit
             rem = limit-self.progress
             if not state:
                 break

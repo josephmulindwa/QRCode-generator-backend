@@ -255,8 +255,9 @@
                 try{
                     let response = fetch( BASE_URL + 'progress/'+uservalue, {method:'GET'});
                     let res = await response;
-                    let progress_data = await res.json();
-                    outputDiv.innerHTML = progress_data[0].toString()+'/'+ progress_data[1].toString().replace("\n", "<br>").replace("\n", "<br>");
+                    let jsondata = await res.json();
+                    console.log(jsondata);
+                    outputDiv.innerHTML = jsondata["progress"]+'/'+ jsondata["total"].toString().replace("\n", "<br>").replace("\n", "<br>");
                 }catch(err){
                     console.log(err);
                 }

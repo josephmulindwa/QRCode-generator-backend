@@ -5,13 +5,14 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import apiutils
+import utils
 import threading
 import re
 import time
 
 app = FastAPI()
 apiutils.setup()
-apiutils.log('Server stated :', clear=True, key="STARTED")
+apiutils.log('Server stated :', key="STARTED")
 
 origins = ['*']
 app.add_middleware(
@@ -35,13 +36,13 @@ class GenerateRequest(BaseModel):
 @ app.get('/')
 def get_home_message():
     html = None
-    with open(os.path.join(apiUtils.ROOT, apiUtils.APP_FOLDER, 'home.html')) as fr:
+    with open(os.path.join(apiutils.ROOT, apiutils.APP_FOLDER, 'home.html')) as fr:
         html = fr.read()
     return HTMLResponse(content=html, status_code=200)
 
 @app.post('/generate')
 async def generate_codes(req : GenerateRequest):
-    apiUtils.log(str(req))
+    apiutils.log(str(req))
     user = req.user
     start = req.start
     count = req.count
@@ -77,7 +78,7 @@ async def get_progress(user : str):
     user_obj = apiutils.get_user_object(username)
     if user_obj is None:
         return status.HTTP_404_NOT_FOUND
-    return user_obj.progress
+    return {"progress":user_obj.progress, "total":user_obj.total}
 
 @app.post('/stringsample')
 async def get_string_samples(req : GenerateRequest):
@@ -116,20 +117,20 @@ async def login():
 @app.get('/downloads/{user}')
 async def get_downloads(user : str):
     # returns a list to downloadable zip files
-    username = apiutils.get_hash(user)
+    username = utils.get_hash(user)
     user_obj = apiutils.get_user_object(username)
     if user_obj is None:
         return status.HTTP_404_NOT_FOUND
     
-    #workingpath = os.path.join(apiUtils.ROOT, apiUtils.WORKING_FOLDER, hashed)
-    #if progress > apiUtils.FOLDER_BATCH or (progress/total) == 1: # there are some folders ready
+    #workingpath = os.path.join(apiutils.ROOT, apiutils.WORKING_FOLDER, hashed)
+    #if progress > apiutils.FOLDER_BATCH or (progress/total) == 1: # there are some folders ready
     #    folders = os.listdir(workingpath) # find the folders
     #    zip_cache = [(folder, hashed+'/'+folder) for folder in folders if len(re.findall('^\d+_\d+\.zip$', folder)) > 0]
     return "still in progress"
 
 @app.get('/download/{user}/{folder}')
 async def download(user : str, folder:str):
-    username = apiutils.get_hash(user)
+    username = utils.get_hash(user)
     user_obj = apiutils.get_user_object(username)
     if user_obj is None:
         return status.HTTP_404_NOT_FOUND
@@ -141,7 +142,7 @@ async def download(user : str, folder:str):
 @app.get('/cancel/{user}')
 async def cancel_generation(user : str):
     '''cancels tasks being handled by this user'''
-    username = apiutils.get_hash(user)
+    username = utils.get_hash(user)
     user_obj = apiutils.get_user_object(username)
     if user_obj is None:
         return status.HTTP_404_NOT_FOUND

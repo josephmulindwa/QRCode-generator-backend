@@ -1,4 +1,5 @@
 import json
+import re
 
 class CollectionsManager:
     """
@@ -39,5 +40,5 @@ def load_config(file):
     return data
 
 def get_hash(string):
-    s = '_'.join(re.findall('\w+', s))
+    s = '_'.join(re.findall('\w+', string))
     return s
