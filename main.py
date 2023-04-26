@@ -1,8 +1,9 @@
 import uvicorn
 from fastapi import FastAPI, status
 from pydantic import BaseModel
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Generator
 import os
 import apiutils
 import utils
@@ -54,9 +55,14 @@ async def generate_codes(req : GenerateRequest):
     
     username = utils.get_hash(user)
     if not overwrite and apiutils.is_active(username):
-        msg =  "Requests for this user are still active!"
+        msg =  "Requests for this user are still active, set overwrite!"
         return msg
-    qrgen = apiutils.QRCodeGenerator(username)
+    # cancel active request
+    user_obj = apiutils.get_user_object(username)
+    if user_obj is not None:
+        user_obj.cancel()
+    # create new generation
+    qrgen = apiutils.get_generator(username)
     apiutils.add_active_request(username, qrgen)
 
     generate_fn = lambda : qrgen.generate(start_number=start, limit=count, serial_length=length, pre_string=pre_string, pro_string=pre_string)
@@ -117,28 +123,47 @@ async def login():
 
 @app.get('/downloads/{user}')
 async def get_downloads(user : str):
-    # returns a list to downloadable zip files
+    # returns a list to currently available zip files
     username = utils.get_hash(user)
     user_obj = apiutils.get_user_object(username)
     if user_obj is None:
         return status.HTTP_404_NOT_FOUND
-    
-    #workingpath = os.path.join(apiutils.ROOT, apiutils.WORKING_FOLDER, hashed)
-    #if progress > apiutils.FOLDER_BATCH or (progress/total) == 1: # there are some folders ready
-    #    folders = os.listdir(workingpath) # find the folders
-    #    zip_cache = [(folder, hashed+'/'+folder) for folder in folders if len(re.findall('^\d+_\d+\.zip$', folder)) > 0]
-    return "still in progress"
 
-@app.get('/download/{user}/{folder}')
-async def download(user : str, folder:str):
-    username = utils.get_hash(user)
-    user_obj = apiutils.get_user_object(username)
-    if user_obj is None:
+    userfolder = user_obj.targetfolder
+    files = os.listdir(userfolder)
+    downloadables = [(file, "{}/{}".format(username,file)) for file in files if len(re.findall('^\d+_\d+\.zip$', file))>0] 
+    return downloadables
+
+def get_data_from_file(file_path: str) -> Generator:
+    with open(file=file_path, mode="rb") as file_like:
+        yield file_like.read()
+
+@app.get('/download/{user}/{file}')
+async def download(user : str, file:str):
+    try:
+        username = utils.get_hash(user)
+        user_obj = apiutils.get_user_object(username)
+        if user_obj is None:
+            return status.HTTP_404_NOT_FOUND
+        dl_file = os.path.join(user_obj.targetfolder, file)
+        if os.path.exists(dl_file):
+            file_contents = get_data_from_file(file_path=dl_file)
+            response = StreamingResponse(
+                content=file_contents,
+                status_code=status.HTTP_200_OK,
+                media_type="application/octet-stream"
+            )
+            # media_type="application/x-zip-compressed",
+            #headers = { "Content-Disposition":f"attachment;filename={}".format(file)}
+            return response
         return status.HTTP_404_NOT_FOUND
-    zip_file = os.path.join(user_obj.targetfolder, folder)
+    except FileNotFoundError:
+        raise HTTPException(detail="File not found.", status_code=status.HTTP_404_NOT_FOUND)
+
     if os.path.exists(zip_file):
         return FileResponse(path=zip_file, media_type='application/octet-stream', filename=folder)
     return status.HTTP_404_NOT_FOUND
+
 
 @app.get('/cancel/{user}')
 async def cancel_generation(user : str):
@@ -147,6 +172,8 @@ async def cancel_generation(user : str):
     user_obj = apiutils.get_user_object(username)
     if user_obj is None:
         return status.HTTP_404_NOT_FOUND
+    if user_obj.is_complete():
+        return "No active task to cancel!"
     user_obj.cancel()
     return "Task cancelled by user!"
 
@@ -155,6 +182,7 @@ def clean_after_self(days_time=30):
     delete files after time
     '''
     # if folder.time.diff(current) >= days_time
+    # handled by database time logger
     pass
 
 if __name__ == "__main__":

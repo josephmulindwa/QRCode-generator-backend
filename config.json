@@ -1,7 +1,7 @@
 {
-    "folder_batch":20128,
+    "folder_batch":500,
     "version":1,
-    "error_correction":"ERROR_CORRECTION_M",
+    "error_correction":"ERROR_CORRECT_M",
     "box_size":4,
     "border":1,
     "fgcolor":[0,0,0],
