@@ -98,7 +98,7 @@ def generate_qrcode(data, version=1, error_correction=qrcode.constants.ERROR_COR
     return img
 
 class QRCodeGenerator:
-    def __init__(self, name=None, version=1, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=4, border=1, folder_batch=FOLDER_BATCH):
+    def __init__(self, name=None, version=1, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=4, border=1, folder_batch=FOLDER_BATCH, fgcolor=(0,0,0), bgcolor=(255,255,255)):
         """
         @params
         
@@ -115,6 +115,8 @@ class QRCodeGenerator:
         self._gen_zip_data = dict()
         self.name = name
         self.folder_batch = folder_batch
+        self.fgcolor = fgcolor
+        self.bgcolor = bgcolor
         self.targetfolder=os.path.join(ROOT, OUTPUT_FOLDER, "__temp__")
         if self.name is not None:
             self.targetfolder=os.path.join(ROOT, OUTPUT_FOLDER, name)
@@ -125,7 +127,7 @@ class QRCodeGenerator:
 
 
     def generate_qrcode(self, data):
-        return generate_qrcode(data, self.version, self.error_correction, self.box_size, self.border)
+        return generate_qrcode(data, self.version, self.error_correction, self.box_size, self.border, fgcolor=self.fgcolor, bgcolor=self.bgcolor)
     
     def generate_qrcodes(self, start_number, end_number, qr_serial_length, csv_serial_length, pre_string, pro_string, outfolder, with_csv=True, update_progress=False):
         """
@@ -239,6 +241,8 @@ def get_generator(name):
     _box_size = config['box_size']
     _border = config['border']
     _folder_batch=config['folder_batch']
+    _fg_color = tuple(config['fgcolor'])
+    _bg_color = tuple(config['bgcolor'])
 
     generator = QRCodeGenerator(
         name=name, 
@@ -246,7 +250,9 @@ def get_generator(name):
         error_correction=_version, 
         box_size=_box_size, 
         border=_border,
-        folder_batch=_folder_batch
+        folder_batch=_folder_batch,
+        fgcolor=_fg_color,
+        bgcolor=_bg_color
         )
     return generator
 
