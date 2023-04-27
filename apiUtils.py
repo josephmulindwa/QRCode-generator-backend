@@ -127,7 +127,7 @@ class QRCodeGenerator:
     def generate_qrcode(self, data):
         return generate_qrcode(data, self.version, self.error_correction, self.box_size, self.border)
     
-    def generate_qrcodes(self, start_number, end_number, serial_length, pre_string, pro_string, outfolder, with_csv=True, update_progress=False):
+    def generate_qrcodes(self, start_number, end_number, qr_serial_length, csv_serial_length, pre_string, pro_string, outfolder, with_csv=True, update_progress=False):
         """
         generates qrcodes and places them into specified folder
         start_number :
@@ -152,13 +152,14 @@ class QRCodeGenerator:
                     # store resume value here
                     # self.start = self.progress
                     return False
-                ifilled = str(i).zfill(serial_length)
+                qr_serial_fill = str(i).zfill(qr_serial_length)
+                csv_serial_fill = str(i).zfill(csv_serial_length)
                 imname = "qrcode{}.png".format(i)
-                qrdata = "{}{}{}".format(pre_string, str(ifilled), pro_string)
+                qrdata = "{}{}{}".format(pre_string, str(qr_serial_fill), pro_string)
                 img = self.generate_qrcode(qrdata)
                 outpath = os.path.join(outfolder, imname) # filename changes here
                 img.save(outpath)
-                csv_data += "{},{}\n".format(ifilled,imname)
+                csv_data += "{},{}\n".format(csv_serial_fill,imname)
                 if i%1000==0:
                     with open(csv_path, 'a') as fw:
                         fw.write(csv_data)
@@ -174,7 +175,7 @@ class QRCodeGenerator:
             log(message=self.error_message, key='error')
             return False
     
-    def generate(self, start_number, limit, serial_length, pre_string, pro_string, with_csv=True, zip=True):
+    def generate(self, start_number, limit, qr_serial_length, csv_serial_length, pre_string, pro_string, with_csv=True, zip=True):
         """
         macro qrcode generator; 
         generates qrcodes and places them in numbered subfolders
@@ -191,8 +192,8 @@ class QRCodeGenerator:
             next_limit = min(rem, self.folder_batch)
             curr_end = im+next_limit
             state = self.generate_qrcodes(
-                start_number=im, end_number=curr_end, serial_length=serial_length, pre_string=pre_string,
-                pro_string=pro_string, outfolder=outfolder, with_csv=with_csv, update_progress=True)
+                start_number=im, end_number=curr_end, qr_serial_length=qr_serial_length, csv_serial_length=csv_serial_length,
+                pre_string=pre_string, pro_string=pro_string, outfolder=outfolder, with_csv=with_csv, update_progress=True)
             # self.progress+=next_limit
             rem = limit-self.progress
             if not state:

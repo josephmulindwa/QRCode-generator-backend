@@ -102,8 +102,12 @@
                             <td><input class="input-field" type="number" id="start" name="start" value="1" min="1" required="true"></td>
                         </tr>
                         <tr>
-                            <td><label for="length"><strong>Length of QRCode serial :</strong></label></td>
-                            <td><input class="input-field" type="number" id="length" name="length" min="1" value="1" required></td>
+                            <td><label for="qr_s_length"><strong>Length of QRCode serial :</strong></label></td>
+                            <td><input class="input-field" type="number" id="qr_s_length" name="qr_s_length" min="1" value="1" required></td>
+                        </tr>
+                        <tr>
+                            <td><label for="csv_s_length"><strong>Length of CSV serial :</strong></label></td>
+                            <td><input class="input-field" type="number" id="csv_s_length" name="csv_s_length" min="1" value="1" required></td>
                         </tr>
                         <tr>
                             <td><label for="pre_string"><strong>Pre String :</strong></label></td>
@@ -147,7 +151,8 @@
                 var userfield = mainform.user.value;
                 var countfield = mainform.count.value;
                 var startfield = mainform.start.value;
-                var lengthfield = mainform.length.value;
+                var qr_s_lengthfield = mainform.qr_s_length.value;
+                var csv_s_lengthfield = mainform.csv_s_length.value;
                 var pre_stringfield = mainform.pre_string.value;
                 var pro_stringfield = mainform.pro_string.value;
                 var overwriteCheckbox = document.getElementById('overwrite');
@@ -156,7 +161,7 @@
                 if (!urlfield.endsWith('/')){
                     urlfield = urlfield + '/';
                 }
-                return [userfield, countfield, startfield, lengthfield, 
+                return [userfield, countfield, startfield, qr_s_lengthfield, csv_s_lengthfield,
                         pre_stringfield, pro_stringfield, overwritefield, urlfield];
             }
 
@@ -165,15 +170,17 @@
                 var userfield = mainformdata[0];
                 var countfield = mainformdata[1];
                 var startfield = mainformdata[2];
-                var lengthfield = mainformdata[3];
-                var pre_stringfield = mainformdata[4];
-                var pro_stringfield = mainformdata[5];
-                var overwritefield = mainformdata[6];
-                var urlfield = mainformdata[7];
+                var qr_s_lengthfield = mainformdata[3];
+                var csv_s_lengthfield = mainformdata[4]
+                var pre_stringfield = mainformdata[5];
+                var pro_stringfield = mainformdata[6];
+                var overwritefield = mainformdata[7];
+                var urlfield = mainformdata[8];
                 if (userfield == ''){ return false; }
                 if (countfield == '' || countfield < 1){ return false; }
                 if (startfield == '' || startfield < 1){ return false; }
-                if (lengthfield == ''){ return false; }
+                if (qr_s_lengthfield == ''){ return false; }
+                if (csv_s_lengthfield == ''){ return false; }
                 if(urlfield == ''){return false;}
                 return true;   
             }
@@ -182,7 +189,7 @@
                 // checks if url is visible & gettable
                 var formdata = getMainFormData();
                 BASE_URL = '__NONE__';
-                var url = formdata[7];
+                var url = formdata[8];
                 try{
                     let response = fetch(url, {method:"GET"});
                     let res = await response;
@@ -262,6 +269,30 @@
                     console.log(err);
                 }
             }
+
+            async function getJSONfromForm(){
+                // returns JSON for current formdata
+                var mainformdata = getMainFormData();
+                var uservalue = mainformdata[0];
+                var countvalue = mainformdata[1];
+                var startvalue = mainformdata[2];
+                var qr_s_lengthvalue = mainformdata[3];
+                var csv_s_lengthvalue = mainformdata[4];
+                var pre_stringvalue = mainformdata[5];
+                var pro_stringvalue = mainformdata[6];
+                var overwritevalue = mainformdata[7];
+
+                var jsondata = {"user":uservalue, 
+                                "count":countvalue, 
+                                "start":startvalue, 
+                                "qr_s_length":qr_s_lengthvalue,
+                                "csv_s_length":csv_s_lengthvalue,
+                                "pre_string":pre_stringvalue,
+                                "pro_string":pro_stringvalue,
+                                "overwrite":overwritevalue
+                            };
+                return jsondata;
+            }
             
             async function onRequestSample(){
                 var valid = validateMainData();
@@ -270,24 +301,7 @@
                     return;
                 }
                 await test_url();
-                
-                var mainformdata = getMainFormData();
-                var uservalue = mainformdata[0];
-                var countvalue = mainformdata[1];
-                var startvalue = mainformdata[2];
-                var lengthvalue = mainformdata[3];
-                var pre_stringvalue = mainformdata[4];
-                var pro_stringvalue = mainformdata[5];
-                var overwritevalue = mainformdata[6];
-
-                var jsondata = {"user":uservalue, 
-                                "count":countvalue, 
-                                "start":startvalue, 
-                                "length":lengthvalue,
-                                "pre_string":pre_stringvalue,
-                                "pro_string":pro_stringvalue,
-                                "overwrite":overwritevalue
-                            };
+                let jsondata = await getJSONfromForm();
                 
                 try{
                     let response = fetch(
@@ -310,24 +324,7 @@
                     return;
                 }
                 await test_url();
-
-                var mainformdata = getMainFormData();
-                var uservalue = mainformdata[0];
-                var countvalue = mainformdata[1];
-                var startvalue = mainformdata[2];
-                var lengthvalue = mainformdata[3];
-                var pre_stringvalue = mainformdata[4];
-                var pro_stringvalue = mainformdata[5];
-                var overwritevalue = mainformdata[6];
-
-                var jsondata = {"user":uservalue, 
-                                "count":countvalue, 
-                                "start":startvalue, 
-                                "length":lengthvalue,
-                                "pre_string":pre_stringvalue,
-                                "pro_string":pro_stringvalue,
-                                "overwrite":overwritevalue
-                            };
+                let jsondata = await getJSONfromForm();
                 
                 try{
                     let response = fetch(

@@ -29,7 +29,8 @@ class GenerateRequest(BaseModel):
     user:str
     start:int
     count:int
-    length:int
+    qr_s_length:int
+    csv_s_length:int
     pre_string:str
     pro_string:str
     overwrite:int
@@ -47,7 +48,8 @@ async def generate_codes(req : GenerateRequest):
     user = req.user
     start = req.start
     count = req.count
-    length = req.length
+    qr_s_length = req.qr_s_length
+    csv_s_length = req.csv_s_length
     pre_string = req.pre_string
     pro_string = req.pro_string
     overwrite = req.overwrite
@@ -65,10 +67,10 @@ async def generate_codes(req : GenerateRequest):
     qrgen = apiutils.get_generator(username)
     apiutils.add_active_request(username, qrgen)
 
-    generate_fn = lambda : qrgen.generate(start_number=start, limit=count, serial_length=length, pre_string=pre_string, pro_string=pre_string)
+    generate_fn = lambda : qrgen.generate(start_number=start, limit=count, qr_serial_length=qr_s_length, 
+                        csv_serial_length=csv_s_length, pre_string=pre_string, pro_string=pro_string)
     try:
         thread = threading.Thread(target=generate_fn, args=())
-        print("starting thread")
         thread.start()
         apiutils.log('{} : Generation started'.format(username))
         return 'Generation started.'
@@ -93,7 +95,8 @@ async def get_string_samples(req : GenerateRequest):
     user = req.user
     start = req.start
     count = req.count
-    length = req.length
+    qr_s_length = req.qr_s_length
+    csv_s_length = req.csv_s_length
     pre_string = req.pre_string
     pro_string = req.pro_string
     overwrite = req.overwrite
@@ -103,9 +106,9 @@ async def get_string_samples(req : GenerateRequest):
     first =  start
     end = first + count-1
     first_str, end_str =  '', ''
-    if length > 0:
-        first_str = str(first).zfill(length)
-        end_str = str(end).zfill(length)
+    if qr_s_length > 0:
+        first_str = str(first).zfill(qr_s_length)
+        end_str = str(end).zfill(qr_s_length)
     elif length < 0:
         first_str = str(first)
         end_str = str(end)
@@ -186,4 +189,4 @@ def clean_after_self(days_time=30):
     pass
 
 if __name__ == "__main__":
-    uvicorn.run(app)
+    uvicorn.run(app, host='0.0.0.0', port=8000)
