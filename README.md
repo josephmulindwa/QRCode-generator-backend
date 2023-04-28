@@ -7,6 +7,7 @@ Project for QRCODE generation API. The project comes with a quick HTML page for 
 - qrcode[pil]
 - fastapi
 - uvicorn
+- mysql-connector-python
 
 ### USAGE
 1. Start the API by running "main.py".

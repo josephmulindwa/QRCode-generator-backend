@@ -10,6 +10,7 @@ import utils
 import threading
 import re
 import time
+import logging
 
 app = FastAPI()
 apiutils.setup()
@@ -189,4 +190,6 @@ def clean_after_self(days_time=30):
     pass
 
 if __name__ == "__main__":
+    uvicorn_access = logging.getLogger("uvicorn.access")
+    uvicorn_access.disabled=True
     uvicorn.run(app, host='0.0.0.0', port=8000)
