@@ -1,8 +1,9 @@
 import uvicorn
 from fastapi import FastAPI, status
 from pydantic import BaseModel
-from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from typing import Generator
 import os
 import apiutils
@@ -12,7 +13,9 @@ import re
 import time
 import logging
 
-app = FastAPI()
+app = FastAPI(title="main app")
+api_app = FastAPI(title="api app")
+
 apiutils.setup()
 apiutils.log('Server stated :', key="STARTED")
 
@@ -36,14 +39,17 @@ class GenerateRequest(BaseModel):
     pro_string:str
     overwrite:int
 
-@ app.get('/')
-def get_home_message():
-    html = None
-    with open(os.path.join(apiutils.ROOT, apiutils.APP_FOLDER, 'home.html')) as fr:
-        html = fr.read()
-    return HTMLResponse(content=html, status_code=200)
+class LoginRequest(BaseModel):
+    identifier:str
+    password:str
 
-@app.post('/generate')
+html_app = FastAPI(name="html api")
+
+html_folder = os.path.join(apiutils.APP_FOLDER, "html")
+app.mount("/api", api_app)
+app.mount("/", StaticFiles(directory=html_folder, html=True), name="html")
+
+@api_app.post('/generate')
 async def generate_codes(req : GenerateRequest):
     apiutils.log(str(req))
     user = req.user
@@ -120,10 +126,21 @@ async def get_string_samples(req : GenerateRequest):
         out += '\n...\n' + end_string
     return out 
 
-@app.post('/login')
-async def login():
-    # login page & token generator
-    pass
+@api_app.post('/login')
+async def login(req : LoginRequest):
+    identifier = req.identifier
+    password = req.password
+    from user import User
+    user = User.fromUsername(identifier)
+    response = {"status":"failed", "message":"username or password is invalid"}
+    if user is not None:
+        print(user.password, password)
+        if user.password == password:
+            response = {"status":"success", "data":user.as_dict()}
+        else:
+            response = {"status":"failed", "message":"invalid password"}
+    print(response)
+    return response
 
 @app.get('/downloads/{user}')
 async def get_downloads(user : str):
@@ -181,6 +198,10 @@ async def cancel_generation(user : str):
     user_obj.cancel()
     return "Task cancelled by user!"
 
+@api_app.get("/test")
+async def test():
+    return "Test is active"
+
 def clean_after_self(days_time=30):
     '''
     delete files after time
@@ -190,6 +211,6 @@ def clean_after_self(days_time=30):
     pass
 
 if __name__ == "__main__":
-    uvicorn_access = logging.getLogger("uvicorn.access")
-    uvicorn_access.disabled=True
+    #uvicorn_access = logging.getLogger("uvicorn.access")
+    #uvicorn_access.disabled=True
     uvicorn.run(app, host='0.0.0.0', port=8000)
