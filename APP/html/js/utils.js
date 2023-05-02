@@ -57,3 +57,11 @@ async function api_get(url){
         console.log(err);
     }
 }
+
+function get_current_username(){
+    return "superadmin"
+}
+
+function get_current_name(){
+    return "SUPER ADMIN"
+}

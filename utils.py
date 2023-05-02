@@ -42,3 +42,14 @@ def load_config(file):
 def get_hash(string):
     s = '_'.join(re.findall('\w+', string))
     return s
+
+def hex_to_rgb(hex_string):
+    try:
+        h = hex_string.lstrip()
+        return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+    except:
+        return None
+
+def clean_string(string):
+    s = '_'.join(re.findall('\w+', string))
+    return s.lower()

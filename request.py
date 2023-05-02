@@ -13,8 +13,8 @@ class Request:
         self.total=None
         self.pre_string=None
         self.pro_string=None
-        self.csv_s_length=None
-        self.qr_s_length=None
+        self.csv_serial_length=None
+        self.qr_serial_length=None
         self.created_on=None
         self.created_by=None
         self.active=None
@@ -40,8 +40,8 @@ class Request:
             total INT,
             pre_string VARCHAR({}),
             pro_string VARCHAR({}),
-            csv_s_length INT,
-            qr_s_length INT,
+            csv_serial_length INT,
+            qr_serial_length INT,
             created_by INT,
             created_on VARCHAR(40),
             progress INT,
@@ -58,38 +58,82 @@ class Request:
         Database.execute(query)
 
     def __setup(self):
-        self.__create_table()
+        if not Database.check_table_exists(Request.table_name):
+            self.__create_table()
     
     @staticmethod
     def fromName(name):
-        pass
+        request = Request()
+        requests = Database.fetch_rows_by_condition(Request.table_name, {"name":[name, "s"]})
+        if requests is not None:
+            request = Request()
+            request.fill_from_data(requests[0])
+        else:
+            request = None
+        return request
 
     @staticmethod
     def fromId(id):
-        pass
+        request = Request()
+        requests = Database.fetch_rows_by_condition(Request.table_name, {"id":[id, "s"]})
+        if requests is not None:
+            request = Request()
+            request.fill_from_data(requests[0])
+        else:
+            request = None
+        return request
 
     def fill_from_data(self, data):
-        pass
+        self.id, self.name, self.description, self.start_value, self.total,\
+        self.pre_string, self.pro_string, self.csv_serial_length, self.qr_serial_length,\
+        self.created_by, self.created_on, self.progress, self.active, self.complete, self.billed,\
+        self.folder_batch, self.config_error_correct, self.config_box_size, self.config_pad,\
+        self.config_fgcolor, self.config_bgcolor = data
+
+    def as_dict(self):
+        return {self.id, self.name, self.description, self.start_value, self.total,
+        self.pre_string, self.pro_string, self.csv_serial_length, self.qr_serial_length,
+        self.created_by, self.created_on, self.progress, self.active, self.complete, self.billed,
+        self.folder_batch, self.config_error_correct, self.config_box_size, self.config_pad ,
+        self.config_fgcolor, self.config_bgcolor}
 
     @staticmethod
-    def insert(name,description,start_value,total,pre_string,pro_string,csv_s_length,qr_s_length,created_by,
+    def insert(name,description,start_value,total,pre_string,pro_string,csv_serial_length,qr_serial_length,created_by,
             folder_batch=100000,progress=0,created_on=None,active=False,complete=False,billed=False,
-            config_error_correct="M",config_box_size=4,config_pad=1,config_fgcolor="(0,0,0)",config_bgcolor="(255,255,255)"):
+            config_error_correct="M",config_box_size=4,config_pad=1,config_fgcolor="#000000",config_bgcolor="#ffffff"):
         query = """INSERT INTO {}(
             name,description,start_value,total,pre_string,pro_string,
-            csv_s_length,qr_s_length,created_by,folder_batch,progress,created_on,
+            csv_serial_length,qr_serial_length,created_by,folder_batch,progress,created_on,
             active,complete,billed,config_error_correct,config_box_size,config_pad,
             config_fgcolor,config_bgcolor)
         VALUES(
-            %s,%s,%d,%d,%s,%s,
-            %d,%d,%d,%d,%s,%s,
-            %d,%d,%d,%s,%d%d,
+            %s,%s,%s,%s,%s,%s,
+            %s,%s,%s,%s,%s,%s,
+            %s,%s,%s,%s,%s,%s,
             %s,%s
-        )"""
+        )""".format(Request.table_name)
         if created_on is None:
             created_on=time.strftime("%d/%m/%Y %H:%M:%S", time.localtime())
         Database.execute(query, (name,description,start_value,total,pre_string,pro_string,
-            csv_s_length,qr_s_length,created_by,folder_batch,progress,created_on,
-            active,complete,billed,config_error_correct,config_box_size,config_pad,
+            csv_serial_length,qr_serial_length,created_by,folder_batch,progress,created_on,
+            int(active),int(complete),int(billed),config_error_correct,config_box_size,config_pad,
             config_fgcolor,config_bgcolor))
 
+def __insert_dummy_request():
+    Request()
+    Request.insert(
+        name="first_req",
+        description="test request",
+        start_value=0,
+        total=1000,
+        pre_string='SN',
+        pro_string='',
+        csv_serial_length=3,
+        qr_serial_length=5,
+        created_by=1
+    )
+
+# __insert_dummy_request()
+req = Request.fromName("first_req")
+
+print(req.name)

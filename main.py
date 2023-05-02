@@ -12,6 +12,8 @@ import threading
 import re
 import time
 import logging
+import authenticate
+from user import User
 
 app = FastAPI(title="main app")
 api_app = FastAPI(title="api app")
@@ -28,18 +30,23 @@ app.add_middleware(
     allow_headers=['*']
     )
 
-class GenerateRequest(BaseModel):
+class RequestForm(BaseModel):
     '''class for generate request'''
-    user:str
-    start:int
+    name:str
+    start_value:int
     count:int
-    qr_s_length:int
-    csv_s_length:int
+    description:str
+    qr_serial_length:int
+    csv_serial_length:int
     pre_string:str
     pro_string:str
-    overwrite:int
+    folder_batch:int
+    box_size:int
+    qr_padding:int
+    foreground_color:str
+    background_color:str
 
-class LoginRequest(BaseModel):
+class LoginForm(BaseModel):
     identifier:str
     password:str
 
@@ -50,22 +57,36 @@ app.mount("/api", api_app)
 app.mount("/", StaticFiles(directory=html_folder, html=True), name="html")
 
 @api_app.post('/generate')
-async def generate_codes(req : GenerateRequest):
+async def generate_codes(req : RequestForm):
     apiutils.log(str(req))
-    user = req.user
-    start = req.start
-    count = req.count
-    qr_s_length = req.qr_s_length
-    csv_s_length = req.csv_s_length
-    pre_string = req.pre_string
-    pro_string = req.pro_string
-    overwrite = req.overwrite
-    overwrite = (overwrite==1)
+
+    name=utils.clean_string(req.name)
+    start_value=req.start_value
+    count=req.count
+    description=req.description
+    qr_serial_length=req.qr_serial_length
+    csv_serial_length=req.csv_serial_length
+    pre_string=req.pre_string
+    pro_string=req.pro_string
+    folder_batch=req.folder_batch
+    box_size=req.box_size
+    qr_padding=req.qr_padding
+    foreground_color=req.foreground_color
+    background_color=req.background_color
+
+    # decompose from token
+    user = User.fromUsername(User.superadmin['username'])
+    if user is None:
+        response = {"status":"failed", "message":"Request failed - no user!"}
+        return response
     
-    username = utils.get_hash(user)
-    if not overwrite and apiutils.is_active(username):
-        msg =  "Requests for this user are still active, set overwrite!"
-        return msg
+    exist_request = user.get_request(name)
+    if exist_request is not None:
+        response = {"status":"failed", "message":"A request with this name already exists!"}
+        return response
+    
+    user.set_request()
+
     # cancel active request
     user_obj = apiutils.get_user_object(username)
     if user_obj is not None:
@@ -127,16 +148,19 @@ async def get_string_samples(req : GenerateRequest):
     return out 
 
 @api_app.post('/login')
-async def login(req : LoginRequest):
+async def login(req : LoginForm):
     identifier = req.identifier
     password = req.password
-    from user import User
     user = User.fromUsername(identifier)
     response = {"status":"failed", "message":"username or password is invalid"}
     if user is not None:
         print(user.password, password)
-        if user.password == password:
-            response = {"status":"success", "data":user.as_dict()}
+        userdata = user.as_dict()
+        userdata["token"] = authenticate.tokenize({"username":user.username})
+        if user.password==password:
+            response = {"status":"success", "data":userdata}
+            if not user.approved:
+                response = {"status":"failed", "message":"user not yet approved"}
         else:
             response = {"status":"failed", "message":"invalid password"}
     print(response)

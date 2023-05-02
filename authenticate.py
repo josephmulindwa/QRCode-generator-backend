@@ -5,11 +5,11 @@ import hmac
 import hashlib
 
 def b64e(s):
-    return base64.b64encode(s.encode()).decode()
+    return base64.b64encode(s.encode(encoding='utf-8')).decode()
 
 
 def b64d(s):
-    return base64.b64decode(s).decode()
+    return base64.b64decode(s).decode(encoding='utf-8')
 
 def get_secret_key():
         return "secret@4"
@@ -34,7 +34,7 @@ def tokenize(data):
     headers = {'alg':'HS256','typ':'JWT'}
     payload = data
     payload["sub"]="none"
-    payload['exp']=time.time() + expire_time
+    payload['exp']=int(time.time()) + expire_time
     jwt = generate_jwt(headers, payload)
     return jwt
 
@@ -46,17 +46,16 @@ def generate_jwt(headers, payload):
         
     signature = hmac.new(bytes(secret, 'UTF-8'), data.encode(), hashlib.sha256).hexdigest()
     signature_encoded = base64url_encode(signature)
-    jwt = "{}.{}.{}".format(headers_encoded, payload_encoded,signature_encoded)
+    jwt = "{}.{}.{}".format(headers_encoded,payload_encoded,signature_encoded)
     return jwt
 
 def decompose_jwt(jwt):
     # returns payload in $jwt, doesn't verify
     tokenParts = jwt.split('.')
-    print(tokenParts)
     header = b64d(tokenParts[0])
-    payload = b64d(tokenParts[1]) #issue
+    payload = b64d(tokenParts[1])
     signature_provided = tokenParts[2]
-    payload_json = json.decode(payload)
+    payload_json = json.loads(payload)
     return payload_json
 
 def is_jwt_valid(jwt):
@@ -109,10 +108,3 @@ def detokenize_from_request(headers, bypass=False):
         if bypass:
             return {"username":"guest"}
         return None
-
-
-token = tokenize({"name":"joe", "age":23})
-data = decompose_jwt(token)
-
-print(token)
-print(data)

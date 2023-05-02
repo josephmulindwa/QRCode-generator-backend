@@ -251,8 +251,8 @@ def get_generator(name):
         box_size=_box_size, 
         border=_border,
         folder_batch=_folder_batch,
-        fgcolor=_fg_color,
-        bgcolor=_bg_color
+        fgcolor=utils.hex_to_rgb(_fg_color),
+        bgcolor=utils.hex_to_rgb(_bg_color)
         )
     return generator
 
