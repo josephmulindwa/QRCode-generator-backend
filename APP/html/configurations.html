@@ -54,7 +54,7 @@
         Requests
       </div>
 
-      <!-- Nav Item  -->
+      <!-- Nav Item - Pages Collapse Menu -->
       <li class="nav-item">
         <a class="nav-link" href="new_request.html" aria-expanded="true">
           <i class="fas fa-fw fa-cog"></i>
@@ -62,7 +62,7 @@
         </a>
       </li>
 
-      <!-- Nav Item -->
+      <!-- Nav Item - Utilities Collapse Menu -->
       <li class="nav-item">
         <a class="nav-link" href="requests.html" aria-expanded="true">
           <i class="fas fa-fw fa-cog"></i>
@@ -203,83 +203,34 @@
         <div class="container-fluid">
 
           <!-- Page Heading -->
-          <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">New Request</h1>
-          </div>
-            <form id="mainform" onsubmit="return false">
-                <div class="form-group row">
-                    <div class="col-sm-2">
-                        <div>Request Name</div>
-                    </div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="text" class="form-control form-control-user" id="name" placeholder="Name to identify this request...">
-                    </div>
-                </div>
-                <div class="form-group row">
-                  <div class="col-sm-2">Description</div>
-                  <div class="col-sm-6 mb-3 mb-sm-0">
-                    <input type="text" cols="2" class="form-control form-control-user" id="description" placeholder="Description">
-                  </div>
-              </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">
-                        <div>Start Value</div>
-                    </div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="startvalue" value="0">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">Count</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="count" value="1">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">QR Serial Length</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="qr_serial_length" value="1">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">CSV Serial Length</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="csv_serial_length" value="1">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">Pre String</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="text" class="form-control form-control-user" id="pre_string">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">Pro String</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                        <input type="text" class="form-control form-control-user" id="pro_string">
-                    </div>
-                </div>
+          <h1 class="h3 mb-2 text-gray-800">Requests</h1>
 
-                <hr>
-                <div class="form-group row">
-                    <div><strong>CONFIGURATION</strong></div>
-                </div>
-                <div>Drop down</div>
-                <hr>
-                    <div class="form-group row">
-                        <div><strong>PREVIEW</strong></div>
-                    </div>
-                    <div class="form-group row">
-                        <div class="col-sm-6 mb-3 mb-sm-0">
-                            <button type="button" class="form-control  btn btn-primary" id="exampleInputPassword">PREVIEW</button>
-                        </div>
-                        <div id="sample-image-div"></div>
-                        <div id="sample-text-div"></div>
-                    </div>
-                <hr>
-                <button type="button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Send Request</button>
-                
-              </form>
+          <!-- DataTales Example -->
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">All Requests</h6>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Version</th>
+                      <th>Folder Batch</th>
+                      <th>Error Correction</th>
+                      <th>Box Size</th>
+                      <th>Border</th>
+                      <th>Fore Color</th>
+                      <th>Back Color</th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
         </div>
         <!-- /.container-fluid -->
 
@@ -351,94 +302,74 @@
     document.getElementById("main-title").innerText = name;
     document.getElementById("sidebar-name").innerText = name;
 
-    var get_form_data = function(){
-        var mainform = document.getElementById("mainform");
-
-        var name=mainform.name.value;
-        var startvalue=mainform.startvalue.value;
-        var count=mainform.count.value;
-        var description=mainform.description.value;
-        var qr_serial_length=mainform.qr_serial_length.value;
-        var csv_serial_length=mainform.csv_serial_length.value;
-        var pre_string=mainform.pre_string.value;
-        var pro_string=mainform.pro_string.value;
-        var config_name="default_config";
-        return [name,startvalue,count,description,qr_serial_length,csv_serial_length,pre_string,pro_string,config_name];
+    var get_data = function(){
+        return ["ALL",0,20];
     }
 
-    function validate_form(){
-        formdata = get_form_data();
-        var name=formdata[0];
-        var startvalue=formdata[1];
-        var count=formdata[2];
-        var description=formdata[3];
-        var qr_serial_length=formdata[4];
-        var csv_serial_length=formdata[5];
-        var pre_string = formdata[6];
-        var pro_string = formdata[7];
-        var config_name = formdata[8];
+    function validate_data(){
+        var qdata = get_data();
+        var category=qdata[0];
+        var start=qdata[1];
+        var limit=qdata[2];
 
         var msg = null;
-        if(!validate_string(name)){
-            msg = "Name not set correctly";
-        }else if(!validate_string(startvalue) || startvalue<0){
+        if(!validate_string(qdata)){
+            msg = "Category not set correctly";
+        }else if(start<0){
             msg = "Start Value not set correctly";
-        }else if(!validate_string(count) || count<0){
-            msg = "Count not set correctly";
-        }else if(!validate_string(qr_serial_length)){
-            msg = "QR Serial not set correctly";
-        }else if(!validate_string(csv_serial_length)){
-            msg = "CSV Serial not set correctly";
-        }else if(!validate_string(config_name)){
-            msg = "Config name not set correctly";
+        }else if(limit<0){
+            msg = "Limit not set correctly";
         }
         return msg;
     }
 
-    async function send_data(){
-        var msg = validate_form();
+    function table_from_data(data){
+      var content="";
+      for(var i=0; i<data.length; i++){
+        var obj = data[i];
+        var row = "<tr><td>"+obj["name"]+"</td>";
+        row += "<td>"+obj["description"]+"</td>";
+        row += "<td>"+obj["start"]+"</td>";
+        row += "<td>"+obj["total"]+"</td>";
+        row += "<td>"+obj["created_on"]+"</td>";
+        row += "<td>"+obj["state"]+"</td></tr>";
+        
+        content += row;
+      }
+      return content;
+    }
+
+    async function request_data(){
+        var msg = validate_data();
         if (msg!==null){
             alert(msg);
             return;
         }
 
-        var formdata = get_form_data();
-        var name=formdata[0];
-        var startvalue=formdata[1];
-        var count=formdata[2];
-        var description=formdata[3];
-        var qr_serial_length=formdata[4];
-        var csv_serial_length=formdata[5];
-        var pre_string = formdata[6];
-        var pro_string = formdata[7];
-        var config_name = formdata[8];
+        var qdata = get_data();
+        var category=qdata[0];
+        var start=qdata[1];
+        var limit=qdata[2];
 
-        var jsondata = {
-            "name":name,
-            "start_value":startvalue,
-            "count":count,
-            "description":description,
-            "qr_serial_length":qr_serial_length,
-            "csv_serial_length":csv_serial_length,
-            "pre_string":pre_string,
-            "pro_string":pro_string,
-            "config_name":config_name
-        }
-
-        var res = await api_post("/generate", jsondata);
+        console.log("MAKING REQUEST");
+        var res = await api_get("/requests/"+category);
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
-            alert(datajs["message"]);
+          alert(datajs["message"]);
         }else{
-            alert(datajs["data"]);
-            // go to some page
+          var requests = datajs["data"];
+          var rows = table_from_data(requests);
+          var table_body = document.getElementById("table-body");
+          table_body.innerHTML = rows;
         }
 
         /*
         pause, cancel, downloads, progress
         */
     }
+
+    request_data();
     
   </script>
 

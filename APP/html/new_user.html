@@ -80,22 +80,10 @@
 
       <!-- Nav Item - Pages Collapse Menu -->
       <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="true" aria-controls="collapsePages">
-          <i class="fas fa-fw fa-folder"></i>
+        <a class="nav-link" href="new_user.html" aria-expanded="true">
+          <i class="fas fa-fw fa-cog"></i>
           <span>New User</span>
         </a>
-        <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
-          <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Login Screens:</h6>
-            <a class="collapse-item" href="login.html">Login</a>
-            <a class="collapse-item" href="register.html">Register</a>
-            <a class="collapse-item" href="forgot-password.html">Forgot Password</a>
-            <div class="collapse-divider"></div>
-            <h6 class="collapse-header">Other Pages:</h6>
-            <a class="collapse-item" href="404.html">404 Page</a>
-            <a class="collapse-item" href="blank.html">Blank Page</a>
-          </div>
-        </div>
       </li>
 
       <!-- Nav Item - Charts -->
@@ -204,82 +192,28 @@
 
           <!-- Page Heading -->
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">New Request</h1>
+            <h1 class="h3 mb-0 text-gray-800">Create User</h1>
           </div>
-            <form id="mainform" onsubmit="return false">
-                <div class="form-group row">
-                    <div class="col-sm-2">
-                        <div>Request Name</div>
-                    </div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="text" class="form-control form-control-user" id="name" placeholder="Name to identify this request...">
-                    </div>
+          <form id="mainform" onsubmit="return false" class="user">
+            <div class="form-group">
+                <input type="text" class="form-control form-control-user" id="name" placeholder="Name">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control form-control-user" id="username" placeholder="Username">
+            </div>
+            <div class="form-group">
+                <input type="email" class="form-control form-control-user" id="email" placeholder="Email Address">
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                <input type="password" class="form-control form-control-user" id="password" placeholder="Password">
                 </div>
-                <div class="form-group row">
-                  <div class="col-sm-2">Description</div>
-                  <div class="col-sm-6 mb-3 mb-sm-0">
-                    <input type="text" cols="2" class="form-control form-control-user" id="description" placeholder="Description">
-                  </div>
-              </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">
-                        <div>Start Value</div>
-                    </div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="startvalue" value="0">
-                    </div>
+                <div class="col-sm-6">
+                <input type="password" class="form-control form-control-user" id="repassword" placeholder="Repeat Password">
                 </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">Count</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="count" value="1">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">QR Serial Length</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="qr_serial_length" value="1">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">CSV Serial Length</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="csv_serial_length" value="1">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">Pre String</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="text" class="form-control form-control-user" id="pre_string">
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">Pro String</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                        <input type="text" class="form-control form-control-user" id="pro_string">
-                    </div>
-                </div>
-
-                <hr>
-                <div class="form-group row">
-                    <div><strong>CONFIGURATION</strong></div>
-                </div>
-                <div>Drop down</div>
-                <hr>
-                    <div class="form-group row">
-                        <div><strong>PREVIEW</strong></div>
-                    </div>
-                    <div class="form-group row">
-                        <div class="col-sm-6 mb-3 mb-sm-0">
-                            <button type="button" class="form-control  btn btn-primary" id="exampleInputPassword">PREVIEW</button>
-                        </div>
-                        <div id="sample-image-div"></div>
-                        <div id="sample-text-div"></div>
-                    </div>
-                <hr>
-                <button type="button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Send Request</button>
-                
-              </form>
+            </div>
+            <button type="button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Register Account</button>
+            </form>
         </div>
         <!-- /.container-fluid -->
 
@@ -353,44 +287,35 @@
 
     var get_form_data = function(){
         var mainform = document.getElementById("mainform");
-
         var name=mainform.name.value;
-        var startvalue=mainform.startvalue.value;
-        var count=mainform.count.value;
-        var description=mainform.description.value;
-        var qr_serial_length=mainform.qr_serial_length.value;
-        var csv_serial_length=mainform.csv_serial_length.value;
-        var pre_string=mainform.pre_string.value;
-        var pro_string=mainform.pro_string.value;
-        var config_name="default_config";
-        return [name,startvalue,count,description,qr_serial_length,csv_serial_length,pre_string,pro_string,config_name];
+        var username=mainform.username.value;
+        var email=mainform.email.value;
+        var password=mainform.password.value;
+        var repassword=mainform.repassword.value;
+        return [name,username,email,password,repassword];
     }
 
     function validate_form(){
         formdata = get_form_data();
         var name=formdata[0];
-        var startvalue=formdata[1];
-        var count=formdata[2];
-        var description=formdata[3];
-        var qr_serial_length=formdata[4];
-        var csv_serial_length=formdata[5];
-        var pre_string = formdata[6];
-        var pro_string = formdata[7];
-        var config_name = formdata[8];
+        var username=formdata[1];
+        var email=formdata[2];
+        var password=formdata[3];
+        var repassword=formdata[4];
 
         var msg = null;
         if(!validate_string(name)){
             msg = "Name not set correctly";
-        }else if(!validate_string(startvalue) || startvalue<0){
-            msg = "Start Value not set correctly";
-        }else if(!validate_string(count) || count<0){
-            msg = "Count not set correctly";
-        }else if(!validate_string(qr_serial_length)){
-            msg = "QR Serial not set correctly";
-        }else if(!validate_string(csv_serial_length)){
-            msg = "CSV Serial not set correctly";
-        }else if(!validate_string(config_name)){
-            msg = "Config name not set correctly";
+        }else if(!validate_string(username) || username.indexOf(" ")>0){
+            msg = "Username not set correctly, ensure no spaces";
+        }else if(!validate_string(email)){
+            msg = "Email not set correctly";
+        }else if(!validate_string(password)){
+            msg = "Password not set correctly";
+        }else if(!validate_string(repassword)){
+            msg = "Re-entered password not set correctly";
+        }else if(password !== repassword){
+            msg = "Passwords don't match";
         }
         return msg;
     }
@@ -402,30 +327,21 @@
             return;
         }
 
-        var formdata = get_form_data();
+        formdata = get_form_data();
         var name=formdata[0];
-        var startvalue=formdata[1];
-        var count=formdata[2];
-        var description=formdata[3];
-        var qr_serial_length=formdata[4];
-        var csv_serial_length=formdata[5];
-        var pre_string = formdata[6];
-        var pro_string = formdata[7];
-        var config_name = formdata[8];
+        var username=formdata[1];
+        var email=formdata[2];
+        var password=formdata[3];
 
         var jsondata = {
             "name":name,
-            "start_value":startvalue,
-            "count":count,
-            "description":description,
-            "qr_serial_length":qr_serial_length,
-            "csv_serial_length":csv_serial_length,
-            "pre_string":pre_string,
-            "pro_string":pro_string,
-            "config_name":config_name
+            "username":username,
+            "email":email,
+            "password":password,
+            "created_by":"superuser"
         }
 
-        var res = await api_post("/generate", jsondata);
+        var res = await api_post("/user/add", jsondata);
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){

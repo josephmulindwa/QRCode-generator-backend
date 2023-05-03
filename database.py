@@ -72,5 +72,4 @@ class Database:
         clause, values = Database.construct_where_clause(condition_dict)
         where_clause = "WHERE "+clause if len(values) > 0 else ""
         query = "SELECT * FROM {} {}".format(table_name, where_clause)
-        print(query, values)
         return Database.execute(query, values, fecthable=True)

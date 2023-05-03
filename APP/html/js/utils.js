@@ -25,8 +25,8 @@ function detect_access_uri(){
     if(splitted.length<2){
         return null;
     }
-    console.log("spl :", splitted);
     var final = splitted[0]+"//"+splitted[1].split("/")[0];
+    
     return final;
 }
 
@@ -48,11 +48,12 @@ async function api_post(url, jsondata){
 }
 
 async function api_get(url){
-    var url = detect_access_uri()+url;
+    var base_url = detect_access_uri()+"/api";
+    var url=base_url+url;
+    console.log("GET :", url);
+
     try{
-        let response = fetch(url, {method:'GET'});
-        let res = await response;
-        return res;
+        return fetch(url, {method:'GET'});
     }catch(err){
         console.log(err);
     }

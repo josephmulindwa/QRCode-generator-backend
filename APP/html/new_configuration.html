@@ -204,67 +204,60 @@
 
           <!-- Page Heading -->
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">New Request</h1>
+            <h1 class="h3 mb-0 text-gray-800">New Configuration</h1>
           </div>
             <form id="mainform" onsubmit="return false">
                 <div class="form-group row">
                     <div class="col-sm-2">
-                        <div>Request Name</div>
+                        <div>Name</div>
                     </div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="text" class="form-control form-control-user" id="name" placeholder="Name to identify this request...">
+                      <input type="text" class="form-control form-control-user" id="name" placeholder="Name of configuration">
                     </div>
                 </div>
                 <div class="form-group row">
-                  <div class="col-sm-2">Description</div>
-                  <div class="col-sm-6 mb-3 mb-sm-0">
-                    <input type="text" cols="2" class="form-control form-control-user" id="description" placeholder="Description">
-                  </div>
-              </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">
-                        <div>Start Value</div>
-                    </div>
+                    <div class="col-sm-2"><div>Version</div></div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="startvalue" value="0">
+                        <input type="number" class="form-control form-control-user" minlength="1" id="version" value="1">
                     </div>
                 </div>
                 <div class="form-group row">
-                    <div class="col-sm-2">Count</div>
+                    <div class="col-sm-2">Folder Batch</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="count" value="1">
+                      <input type="number" class="form-control form-control-user" minlength="1" id="folder_batch" value="1">
                     </div>
                 </div>
                 <div class="form-group row">
-                    <div class="col-sm-2">QR Serial Length</div>
+                    <div class="col-sm-2">Error Correction</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="qr_serial_length" value="1">
+                      <input type="text" class="form-control form-control-user" id="error_correction">
                     </div>
                 </div>
                 <div class="form-group row">
-                    <div class="col-sm-2">CSV Serial Length</div>
+                    <div class="col-sm-2">Box Size</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="csv_serial_length" value="1">
+                      <input type="number" class="form-control form-control-user" minlength="1" id="box_size" value="1">
                     </div>
                 </div>
                 <div class="form-group row">
-                    <div class="col-sm-2">Pre String</div>
+                    <div class="col-sm-2">Border</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="text" class="form-control form-control-user" id="pre_string">
+                      <input type="text" class="form-control form-control-user" id="border">
                     </div>
                 </div>
                 <div class="form-group row">
-                    <div class="col-sm-2">Pro String</div>
+                    <div class="col-sm-2">Front Color</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                        <input type="text" class="form-control form-control-user" id="pro_string">
+                        <input type="text" class="form-control form-control-user" id="fgcolor">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2">Back Color</div>
+                    <div class="col-sm-6 mb-3 mb-sm-0">
+                        <input type="text" class="form-control form-control-user" id="bgcolor">
                     </div>
                 </div>
 
-                <hr>
-                <div class="form-group row">
-                    <div><strong>CONFIGURATION</strong></div>
-                </div>
-                <div>Drop down</div>
                 <hr>
                     <div class="form-group row">
                         <div><strong>PREVIEW</strong></div>
@@ -277,7 +270,7 @@
                         <div id="sample-text-div"></div>
                     </div>
                 <hr>
-                <button type="button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Send Request</button>
+                <button type="button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Save</button>
                 
               </form>
         </div>
@@ -355,42 +348,44 @@
         var mainform = document.getElementById("mainform");
 
         var name=mainform.name.value;
-        var startvalue=mainform.startvalue.value;
-        var count=mainform.count.value;
-        var description=mainform.description.value;
-        var qr_serial_length=mainform.qr_serial_length.value;
-        var csv_serial_length=mainform.csv_serial_length.value;
-        var pre_string=mainform.pre_string.value;
-        var pro_string=mainform.pro_string.value;
-        var config_name="default_config";
-        return [name,startvalue,count,description,qr_serial_length,csv_serial_length,pre_string,pro_string,config_name];
+        var version=mainform.version.value;
+        var folder_batch=mainform.folder_batch.value;
+        var error_correction=mainform.error_correction.value;
+        var box_size=mainform.box_size.value;
+        var border=mainform.border.value;
+        var fgcolor=mainform.fgcolor.value;
+        var bgcolor=mainform.bgcolor.value;
+        return [name,version,folder_batch,error_correction,box_size,border,fgcolor,bgcolor];
     }
 
     function validate_form(){
-        formdata = get_form_data();
+        var formdata = get_form_data();
         var name=formdata[0];
-        var startvalue=formdata[1];
-        var count=formdata[2];
-        var description=formdata[3];
-        var qr_serial_length=formdata[4];
-        var csv_serial_length=formdata[5];
-        var pre_string = formdata[6];
-        var pro_string = formdata[7];
-        var config_name = formdata[8];
+        var version=formdata[1];
+        var folder_batch=formdata[2];
+        var error_correction=formdata[3];
+        var box_size=formdata[4];
+        var border=formdata[5];
+        var fgcolor=formdata[6];
+        var bgcolor=formdata[7];
 
         var msg = null;
         if(!validate_string(name)){
             msg = "Name not set correctly";
-        }else if(!validate_string(startvalue) || startvalue<0){
-            msg = "Start Value not set correctly";
-        }else if(!validate_string(count) || count<0){
-            msg = "Count not set correctly";
-        }else if(!validate_string(qr_serial_length)){
-            msg = "QR Serial not set correctly";
-        }else if(!validate_string(csv_serial_length)){
-            msg = "CSV Serial not set correctly";
-        }else if(!validate_string(config_name)){
-            msg = "Config name not set correctly";
+        }else if(!validate_string("version")){
+            msg = "Version not set correctly";
+        }else if(!validate_string(folder_batch)){
+            msg = "Folder Batch not set correctly";
+        }else if(!validate_string(error_correction)){
+            msg = "Error correction not set correctly";
+        }else if(!validate_string(box_size)){
+            msg = "Box size not set correctly";
+        }else if(!validate_string(border)){
+            msg = "Border name not set correctly";
+        }else if(!validate_string(fgcolor)){
+            msg = "Fore color name not set correctly";
+        }else if(!validate_string(bgcolor)){
+            msg = "Back color name not set correctly";
         }
         return msg;
     }
@@ -404,28 +399,26 @@
 
         var formdata = get_form_data();
         var name=formdata[0];
-        var startvalue=formdata[1];
-        var count=formdata[2];
-        var description=formdata[3];
-        var qr_serial_length=formdata[4];
-        var csv_serial_length=formdata[5];
-        var pre_string = formdata[6];
-        var pro_string = formdata[7];
-        var config_name = formdata[8];
+        var version=formdata[1];
+        var folder_batch=formdata[2];
+        var error_correction=formdata[3];
+        var box_size=formdata[4];
+        var border=formdata[5];
+        var fgcolor=formdata[6];
+        var bgcolor=formdata[7];
 
         var jsondata = {
             "name":name,
-            "start_value":startvalue,
-            "count":count,
-            "description":description,
-            "qr_serial_length":qr_serial_length,
-            "csv_serial_length":csv_serial_length,
-            "pre_string":pre_string,
-            "pro_string":pro_string,
-            "config_name":config_name
+            "version":version,
+            "folder_batch":folder_batch,
+            "error_correction":error_correction,
+            "box_size":box_size,
+            "border":border,
+            "fore_color":fgcolor,
+            "back_color":bgcolor
         }
 
-        var res = await api_post("/generate", jsondata);
+        var res = await api_post("/configurations/add", jsondata);
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){

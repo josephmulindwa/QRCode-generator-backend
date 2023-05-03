@@ -45,6 +45,8 @@ def get_hash(string):
 
 def hex_to_rgb(hex_string):
     try:
+        if "#" in hex_string:
+            hex_string = hex_string.replace("#", '')
         h = hex_string.lstrip()
         return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
     except:

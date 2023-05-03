@@ -1,0 +1,12 @@
+Tables.init()
+Config
+@param docs
+req->delete files,pause, cancel, downloads, progress
+
+user->grant_permissions
+validate_permissions in backend on request
+
+try-catch all routes
+folder-batch cant be zero
+config cannot save invalid data
+

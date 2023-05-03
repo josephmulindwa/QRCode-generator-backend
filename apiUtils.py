@@ -19,25 +19,20 @@ MAX_ZIP_THREADS=8
 
 # db
 ACTIVE_OBJECTS = dict()
-def is_active(username):
-    global ACTIVE_OBJECTS
-    if username in ACTIVE_OBJECTS.keys():
-        return True
-    return False
 
-def add_active_request(username, obj):
+def add_qrgen_object(key, obj):
     global ACTIVE_OBJECTS
-    ACTIVE_OBJECTS[username] = obj
+    ACTIVE_OBJECTS[key] = obj
 
-def remove_active_request(username):
+def remove_qrgen_request(key):
     global ACTIVE_OBJECTS
-    if is_active(username):
-        del ACTIVE_OBJECTS[username]
+    if key in ACTIVE_OBJECTS:
+        del ACTIVE_OBJECTS[key]
 
-def get_user_object(username):
+def get_qrgen_object(key):
     global ACTIVE_OBJECTS
-    if is_active(username):
-        return ACTIVE_OBJECTS[username]
+    if key in ACTIVE_OBJECTS:
+        return ACTIVE_OBJECTS[key]
     return None
 
 def setup():
@@ -233,21 +228,20 @@ class QRCodeGenerator:
     def is_complete(self):
         return self.total==self.progress  # and zipping is done
 
-def get_generator(name):
-    # generates a generator object that conforms to the config
-    config = utils.load_config("config.json")    
+def get_generator_from_config(name, config):
+    # generates a generator object that conforms to the config  
     _version = config['version']
     _error_correction = eval("qrcode.constants.{}".format(config['error_correction']))
     _box_size = config['box_size']
     _border = config['border']
     _folder_batch=config['folder_batch']
-    _fg_color = tuple(config['fgcolor'])
-    _bg_color = tuple(config['bgcolor'])
+    _fg_color = config['fgcolor']
+    _bg_color = config['bgcolor']
 
     generator = QRCodeGenerator(
         name=name, 
         version=_version, 
-        error_correction=_version, 
+        error_correction=_error_correction, 
         box_size=_box_size, 
         border=_border,
         folder_batch=_folder_batch,
