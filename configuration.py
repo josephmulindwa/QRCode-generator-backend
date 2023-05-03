@@ -98,7 +98,7 @@ class Configuration:
 
     @staticmethod
     def get_configurations_by_id(id):
-        rows = Database.fetch_rows_by_condition(Configuration.table_name, {"id":[id, "s"]})
+        rows = Database.fetch_rows_by_condition(Configuration.table_name, {"user_id":[id, "s"]})
         if rows is not None and len(rows)>0:
             configs = [Configuration.fromData(data) for data in rows]
             return configs

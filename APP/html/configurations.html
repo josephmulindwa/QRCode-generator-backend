@@ -328,11 +328,13 @@
       for(var i=0; i<data.length; i++){
         var obj = data[i];
         var row = "<tr><td>"+obj["name"]+"</td>";
-        row += "<td>"+obj["description"]+"</td>";
-        row += "<td>"+obj["start"]+"</td>";
-        row += "<td>"+obj["total"]+"</td>";
-        row += "<td>"+obj["created_on"]+"</td>";
-        row += "<td>"+obj["state"]+"</td></tr>";
+        row += "<td>"+obj["version"]+"</td>";
+        row += "<td>"+obj["folder_batch"]+"</td>";
+        row += "<td>"+obj["error_correction"]+"</td>";
+        row += "<td>"+obj["box_size"]+"</td>";
+        row += "<td>"+obj["border"]+"</td>";
+        row += "<td>"+obj["fgcolor"]+"</td>";
+        row += "<td>"+obj["bgcolor"]+"</td></tr>";
         
         content += row;
       }
@@ -351,8 +353,7 @@
         var start=qdata[1];
         var limit=qdata[2];
 
-        console.log("MAKING REQUEST");
-        var res = await api_get("/requests/"+category);
+        var res = await api_get("/configurations/list");
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
