@@ -128,6 +128,13 @@ class Request:
             return count_data[0][0]
         return None
 
+    @staticmethod
+    def find_requests_like(pattern, user_id=None):
+        requests = Database.fetch_rows_like(Request.table_name, "name", pattern, created_by=user_id)
+        if requests is not None:
+            return [Request.fromData(data) for data in requests]
+        return None
+
 
 def __insert_dummy_request():
     Request()

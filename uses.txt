@@ -1,5 +1,4 @@
 Tables.init()
-Config
 @param docs
 req->delete files,pause, cancel, downloads, progress
 
@@ -7,6 +6,19 @@ user->grant_permissions
 validate_permissions in backend on request
 
 try-catch all routes
-folder-batch cant be zero
-config cannot save invalid data
 
+super-adminship and permissions is handled in self requests to return id=None or val
+
+my requests, user requests@admin
+
+sort requests by date
+
+from data-> None and len()>0
+
+to-do
+-profile
+-create-unapproved-account
+-edit user
+
+-conditional renders
+-table-limit

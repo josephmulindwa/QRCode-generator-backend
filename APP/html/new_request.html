@@ -132,12 +132,12 @@
                         <input type="text" class="form-control form-control-user" id="pro_string">
                     </div>
                 </div>
-
-                <hr>
                 <div class="form-group row">
-                    <div><strong>CONFIGURATION</strong></div>
+                  <div class="col-sm-2">Configuration</div>
+                  <div class="col-sm-6 mb-3 mb-sm-0">
+                    <select id="configurations" class="btn"></select>
+                  </div>
                 </div>
-                <div>Drop down</div>
                 <hr>
                     <div class="form-group row">
                         <div><strong>PREVIEW</strong></div>
@@ -232,7 +232,7 @@
         var csv_serial_length=mainform.csv_serial_length.value;
         var pre_string=mainform.pre_string.value;
         var pro_string=mainform.pro_string.value;
-        var config_name="default_config";
+        var config_name=mainform.configurations.value;
         return [name,startvalue,count,description,qr_serial_length,csv_serial_length,pre_string,pro_string,config_name];
     }
 
@@ -304,11 +304,23 @@
             alert(datajs["data"]);
             window.location.href = "requests.html"
         }
-
-        /*
-        pause, cancel, downloads, progress
-        */
     }
+
+    async function fetch_and_set_configurations(){
+      var res = await api_get("/configurations/list");
+      var datajs = await res.json();
+      if(datajs["status"]=="success"){
+        var confightml="";
+        var configs = datajs["data"];
+        for (var i=0; i<configs.length; i++){
+          var name = configs[i]["name"];
+          var inner = "<option value='"+name+"'>"+name+"</option>";
+          confightml+=inner;
+        }
+        document.getElementById("configurations").innerHTML=confightml;
+      }
+    }
+    fetch_and_set_configurations();
     
   </script>
 

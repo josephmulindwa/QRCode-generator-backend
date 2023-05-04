@@ -45,7 +45,7 @@ class Configuration:
     def fromName(name):
         configuration = Configuration()
         configs = Database.fetch_rows_by_condition(Configuration.table_name, {"name":[name, "s"]})
-        if configs is not None:
+        if configs is not None and len(configs)>0:
             configuration = Configuration()
             configuration.fill_from_data(configs[0])
         else:
@@ -56,7 +56,7 @@ class Configuration:
     def fromId(id):
         configuration = Configuration()
         configs = Database.fetch_rows_by_condition(Configuration.table_name, {"id":[id, "s"]})
-        if configs is not None:
+        if configs is not None and len(configs)>0:
             configuration = Configuration()
             configuration.fill_from_data(configs[0])
         else:
@@ -123,3 +123,10 @@ class Configuration:
     @staticmethod
     def get_error_correction_levels():
         return ["ERROR_CORRECT_M", "ERROR_CORRECT_L", "ERROR_CORRECT_H", "ERROR_CORRECT_Q"]
+
+    @staticmethod
+    def find_configurations_like(pattern, user_id=None):
+        configs = Database.fetch_rows_like(Configuration.table_name, "name", pattern, user_id=user_id)
+        if configs is not None:
+            return [Configuration.fromData(data)  for data in configs]
+        return None

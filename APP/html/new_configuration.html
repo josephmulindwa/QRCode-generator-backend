@@ -89,12 +89,6 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <div class="col-sm-2"><div>Version</div></div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                        <input type="number" class="form-control form-control-user" minlength="1" id="version" value="1">
-                    </div>
-                </div>
-                <div class="form-group row">
                     <div class="col-sm-2">Folder Batch</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
                       <input type="number" class="form-control form-control-user" minlength="1" id="folder_batch" value="1">
@@ -103,7 +97,7 @@
                 <div class="form-group row">
                     <div class="col-sm-2">Error Correction</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="text" class="form-control form-control-user" id="error_correction">
+                      <select id="error_correction" class="btn"></select>
                     </div>
                 </div>
                 <div class="form-group row">
@@ -119,13 +113,13 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <div class="col-sm-2">Front Color</div>
+                    <div class="col-sm-2">Fore Color Hex</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
                         <input type="text" class="form-control form-control-user" id="fgcolor">
                     </div>
                 </div>
                 <div class="form-group row">
-                    <div class="col-sm-2">Back Color</div>
+                    <div class="col-sm-2">Back Color Hex</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
                         <input type="text" class="form-control form-control-user" id="bgcolor">
                     </div>
@@ -218,7 +212,7 @@
         var mainform = document.getElementById("mainform");
 
         var name=mainform.name.value;
-        var version=mainform.version.value;
+        var version=1;
         var folder_batch=mainform.folder_batch.value;
         var error_correction=mainform.error_correction.value;
         var box_size=mainform.box_size.value;
@@ -242,8 +236,6 @@
         var msg = null;
         if(!validate_string(name)){
             msg = "Name not set correctly";
-        }else if(!validate_string("version")){
-            msg = "Version not set correctly";
         }else if(!validate_string(folder_batch)){
             msg = "Folder Batch not set correctly";
         }else if(!validate_string(error_correction)){
@@ -295,13 +287,25 @@
             alert(datajs["message"]);
         }else{
             alert(datajs["data"]);
-            // go to some page
+            window.location.href="configurations.html";
         }
-
-        /*
-        pause, cancel, downloads, progress
-        */
     }
+
+    async function fetch_and_set_error_corrections(){
+      var res = await api_get("/configurations/error_correction_levels");
+      var datajs = await res.json();
+      if(datajs["status"]=="success"){
+        var levelhtml="";
+        var levels = datajs["data"];
+        for (var i=0; i<levels.length; i++){
+          var name = levels[i];
+          var inner = "<option value='"+name+"'>"+name+"</option>";
+          levelhtml+=inner;
+        }
+        document.getElementById("error_correction").innerHTML=levelhtml;
+      }
+    }
+    fetch_and_set_error_corrections();
     
   </script>
 

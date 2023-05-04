@@ -55,7 +55,7 @@ class User:
     def fromEmail(email):
         user = User()
         users = Database.fetch_rows_by_condition(User.table_name, {"email":[email, "s"]})
-        if users is not None:
+        if users is not None and len(users)>0:
             user = User()
             user.fill_from_data(users[0])
         else:
@@ -66,7 +66,7 @@ class User:
     def fromId(id):
         user = User()
         users = Database.fetch_rows_by_condition(User.table_name, {"id":[id, "i"]})
-        if users is not None:
+        if users is not None and len(users)>0:
             user = User()
             user.fill_from_data(users[0])
         else:
@@ -172,6 +172,26 @@ class User:
         if users is None:
             return []
         return users
+    
+    def find_users_like_name(self, name):
+        rows = Database.fetch_rows_like(User.table_name, "name", name)
+        if rows is not None:
+            users = [User.fromData(data) for data in rows]
+            return users
+        return None
+    
+    def find_users_like_username(self, username):
+        rows = Database.fetch_rows_like(User.table_name, "username", username)
+        if rows is not None:
+            users = [User.fromData(data) for data in rows]
+            return users
+        return None
+
+    def find_requests_like(self, pattern):
+        return Request.find_requests_like(pattern, self.id) #depending on permission
+
+    def find_configurations_like(self, pattern):
+        return Configuration.find_configurations_like(pattern, self.id)
     
     def add_configuration(self, name, folder_batch, version, error_correction, box_size, border, fgcolor, bgcolor):
         Configuration.insert(name, self.id, folder_batch, version, error_correction, box_size, border, fgcolor, bgcolor)

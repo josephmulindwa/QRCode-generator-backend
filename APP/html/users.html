@@ -41,9 +41,10 @@
           <!-- Topbar Search -->
           <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
             <div class="input-group">
-              <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+              <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." 
+              aria-label="Search" aria-describedby="basic-addon2" id="search-bar">
               <div class="input-group-append">
-                <button class="btn btn-primary" type="button">
+                <button class="btn btn-primary" type="button" onclick="request_data_by_search_text()">
                   <i class="fas fa-search fa-sm"></i>
                 </button>
               </div>
@@ -228,15 +229,37 @@
         if (datajs["status"]!=="success"){
           alert(datajs["message"]);
         }else{
-          var requests = datajs["data"];
-          var rows = table_from_data(requests);
+          var users = datajs["data"];
+          var rows = table_from_data(users);
           var table_body = document.getElementById("table-body");
           table_body.innerHTML = rows;
         }
 
     }
-
     request_data();
+
+    // search feature
+    async function request_data_by_search_text(){
+      var search_bar = document.getElementById("search-bar");
+      var text = search_bar.value;
+      console.log("TEXT:", text);
+      if (!validate_string(text)){
+        request_data();
+        return;
+      }
+      
+      var res = await api_get("/users/search/"+text);
+      var datajs = await res.json();
+      console.log("DATAJS :", datajs);
+      if (datajs["status"]!=="success"){
+        alert(datajs["message"]);
+      }else{
+        var users = datajs["data"];
+        var rows = table_from_data(users);
+        var table_body = document.getElementById("table-body");
+        table_body.innerHTML = rows;
+      }
+    }
     
   </script>
 

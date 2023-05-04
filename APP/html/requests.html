@@ -41,9 +41,10 @@
           <!-- Topbar Search -->
           <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
             <div class="input-group">
-              <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+              <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." 
+                aria-label="Search" aria-describedby="basic-addon2" id="search-bar">
               <div class="input-group-append">
-                <button class="btn btn-primary" type="button">
+                <button class="btn btn-primary" type="button" onclick="request_data_by_search_text()">
                   <i class="fas fa-search fa-sm"></i>
                 </button>
               </div>
@@ -88,8 +89,18 @@
           <!-- DataTales Example -->
           <div class="card shadow mb-4">
             <div class="card-header py-3">
-              <h6 class="m-0 font-weight-bold text-primary">All Requests</h6>
+                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Select Category
+                </button>
+                <div class="dropdown-menu animated--fade-in" aria-labelledby="dropdownMenuButton">
+                  <span class="dropdown-item">All Requests</span>
+                  <span class="dropdown-item">Active Requests</span>
+                  <span class="dropdown-item">Billed Requests</span>
+                  <span class="dropdown-item">Complete Requests</span>
+                  <span class="dropdown-item">Inactive Requests</span>
+                </div>
             </div>
+            
             <div class="card-body">
               <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -178,19 +189,16 @@
     document.getElementById("sidebar-name").innerText = name;
 
     var get_data = function(){
-        return ["ALL",0,20];
+        return [0,20];
     }
 
     function validate_data(){
         var qdata = get_data();
-        var category=qdata[0];
-        var start=qdata[1];
-        var limit=qdata[2];
+        var start=qdata[0];
+        var limit=qdata[1];
 
         var msg = null;
-        if(!validate_string(qdata)){
-            msg = "Category not set correctly";
-        }else if(start<0){
+        if(start<0){
             msg = "Start Value not set correctly";
         }else if(limit<0){
             msg = "Limit not set correctly";
@@ -214,7 +222,7 @@
       return content;
     }
 
-    async function request_data(){
+    async function request_data_by_category(category){
         var msg = validate_data();
         if (msg!==null){
             alert(msg);
@@ -222,7 +230,6 @@
         }
 
         var qdata = get_data();
-        var category=qdata[0];
         var start=qdata[1];
         var limit=qdata[2];
 
@@ -238,13 +245,45 @@
           var table_body = document.getElementById("table-body");
           table_body.innerHTML = rows;
         }
+      }
 
-        /*
-        pause, cancel, downloads, progress
-        */
+    //fill table
+    function on_click_category_item(category_text){
+      var spl = category_text.split(" ");
+      var category = spl[0].toUpperCase();
+      console.log("Category :", category);
+      request_data_by_category(category);
+
     }
+    $('.dropdown-item').on('click', 
+    function(){
+      $('#dropdownMenuButton').text($(this).text());
+      on_click_category_item($(this).text());
+    })
+    request_data_by_category("ALL");
 
-    request_data();
+    // search functionality
+    async function request_data_by_search_text(){
+      var search_bar = document.getElementById("search-bar");
+      var text = search_bar.value;
+      console.log("TEXT:", text);
+      if (!validate_string(text)){
+        request_data_by_category("ALL");
+        return;
+      }
+      
+      var res = await api_get("/requests/search/"+text);
+      var datajs = await res.json();
+      console.log("DATAJS :", datajs);
+      if (datajs["status"]!=="success"){
+        alert(datajs["message"]);
+      }else{
+        var requests = datajs["data"];
+        var rows = table_from_data(requests);
+        var table_body = document.getElementById("table-body");
+        table_body.innerHTML = rows;
+      }
+    }
     
   </script>
 

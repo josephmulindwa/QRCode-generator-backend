@@ -372,6 +372,55 @@ async def get_user_count():
             response = {"status":"failed", "message":"Unkown category `{}`".format(category)}
     return response
 
+@api_app.get("/users/search/{text}")
+async def search_users_by_text(text : str):
+    user = User.fromUsername(User.superadmin['username'])
+    if user is None:
+        response = {"status":"failed", "message":"No such user"}
+    else:
+        users_by_name = user.find_users_like_name(text)
+        users_by_username = user.find_users_like_username(text)
+        user_ids=[]
+        users = []
+        if users_by_name is not None:
+            for user in users_by_name:
+                if user.id not in user_ids:
+                    users.append(user)
+                    user_ids.append(user.id)
+        if users_by_username is not None:
+            for user in users_by_username:
+                if user.id not in user_ids:
+                    users.append(user)
+                    user_ids.append(user.id)
+        response = {"status":"success", "data":[user.as_dict() for user in users]}
+        if users is None:
+            response = {"status":"failed", "message":"An error occured on our end"}
+    return response
+
+@api_app.get("/requests/search/{text}")
+async def search_requests_by_text(text : str):
+    user = User.fromUsername(User.superadmin['username'])
+    if user is None:
+        response = {"status":"failed", "message":"No such user"}
+    else:
+        requests = user.find_requests_like(text)
+        response = {"status":"success", "data":[req.as_dict()  for req in requests]}
+        if requests is None:
+            response = {"status":"failed", "message":"An error occured on our end"}
+    return response
+
+@api_app.get("/configurations/search/{text}")
+async def search_requests_by_text(text : str):
+    user = User.fromUsername(User.superadmin['username'])
+    if user is None:
+        response = {"status":"failed", "message":"No such user"}
+    else:
+        configs = user.find_configurations_like(text)
+        response = {"status":"success", "data":[config.as_dict()  for config in configs]}
+        if configs is None:
+            response = {"status":"failed", "message":"An error occured on our end"}
+    return response
+
 @api_app.get("/requests/count_all/{category}")
 async def get_user_count(category : str):
     user = User.fromUsername(User.superadmin['username'])
@@ -383,7 +432,11 @@ async def get_user_count(category : str):
         if count is None:
             response = {"status":"failed", "message":"Unkown category `{}`".format(category)}
     return response
-        
+
+@api_app.get("/configurations/error_correction_levels")
+async def get_error_corrections():
+    response = {"status":"success", "data":Configuration.error_correction_levels}
+    return response
 
 def clean_after_self(days_time=30):
     '''

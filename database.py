@@ -28,9 +28,6 @@ class Database:
             result = None
             if fecthable:
                 result = cursor.fetchall()
-                if result is not None:
-                    if type(result)!=int and len(result)==0:
-                        result = None
             Database.connection.commit()
             cursor.close()
             return result
@@ -81,3 +78,13 @@ class Database:
         where_clause = "WHERE "+clause if len(values) > 0 else ""
         query = "SELECT COUNT({}) FROM {} {}".format(count_field,table_name, where_clause)
         return Database.execute(query, values, fecthable=True)
+
+    @staticmethod
+    def fetch_rows_like(table_name, column, pattern, user_id=None, created_by=None):
+        where_id_clause = ""
+        if user_id is not None:
+            where_id_clause = " user_id={} AND ".format(user_id)
+        elif created_by is not None:
+            where_id_clause = " created_by={} AND ".format(created_by)
+        query = """SELECT * FROM {} WHERE {} {} LIKE '%{}%'""".format(table_name, where_id_clause, column, pattern)
+        return Database.execute(query, [], fecthable=True)
