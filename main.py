@@ -359,6 +359,30 @@ async def get_configurations():
         data = [config.as_dict() for config in configs]
         response = {"status":"success", "data":data}
     return response
+
+@api_app.get("/users/count")
+async def get_user_count():
+    user = User.fromUsername(User.superadmin['username'])
+    if user is None:
+        response = {"status":"failed", "message":"No such user"}
+    else:
+        count = user.count_users()
+        response = {"status":"success", "data":count}
+        if count is None:
+            response = {"status":"failed", "message":"Unkown category `{}`".format(category)}
+    return response
+
+@api_app.get("/requests/count_all/{category}")
+async def get_user_count(category : str):
+    user = User.fromUsername(User.superadmin['username'])
+    if user is None:
+        response = {"status":"failed", "message":"No such user"}
+    else:
+        count = user.count_all_requests(category=category)
+        response = {"status":"success", "data":count}
+        if count is None:
+            response = {"status":"failed", "message":"Unkown category `{}`".format(category)}
+    return response
         
 
 def clean_after_self(days_time=30):

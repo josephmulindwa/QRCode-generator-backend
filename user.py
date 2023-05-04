@@ -179,6 +179,20 @@ class User:
     def get_configurations(self):
         return Configuration.get_configurations_by_id(self.id)
 
+    def count_users(self):
+        count_data = Database.count_rows_by_condition(User.table_name, {})
+        if count_data is not None and type(count_data)==list:
+            return max(0, count_data[0][0]-1)
+        return None
+
+    def count_all_requests(self, category="ALL"):
+        return Request.count_requests(user_id=None, category=category)
+
+    def count_requests(self, category="ALL"):
+        return Request.count_requests(user_id=self.id, category=category)
+
+
+
         
 
 #user = User()

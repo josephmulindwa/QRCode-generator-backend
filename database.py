@@ -28,8 +28,9 @@ class Database:
             result = None
             if fecthable:
                 result = cursor.fetchall()
-                if result is not None and len(result)==0:
-                    result = None
+                if result is not None:
+                    if type(result)!=int and len(result)==0:
+                        result = None
             Database.connection.commit()
             cursor.close()
             return result
@@ -72,4 +73,11 @@ class Database:
         clause, values = Database.construct_where_clause(condition_dict)
         where_clause = "WHERE "+clause if len(values) > 0 else ""
         query = "SELECT * FROM {} {}".format(table_name, where_clause)
+        return Database.execute(query, values, fecthable=True)
+    
+    @staticmethod
+    def count_rows_by_condition(table_name, condition_dict, count_field="id"):
+        clause, values = Database.construct_where_clause(condition_dict)
+        where_clause = "WHERE "+clause if len(values) > 0 else ""
+        query = "SELECT COUNT({}) FROM {} {}".format(count_field,table_name, where_clause)
         return Database.execute(query, values, fecthable=True)

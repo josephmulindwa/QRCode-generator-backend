@@ -59,10 +59,10 @@ async function api_get(url){
     }
 }
 
-function get_current_username(){
-    return "superadmin"
+function get_active_username(){
+    return "superadmin";
 }
 
-function get_current_name(){
-    return "SUPER ADMIN"
+function get_active_name(){
+    return "SUPER ADMIN";
 }

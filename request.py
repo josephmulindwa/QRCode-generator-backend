@@ -113,6 +113,21 @@ class Request:
         if requests is not None and len(requests)>0:
             return [Request.fromData(data) for data in requests]
         return None
+    
+    @staticmethod
+    def count_requests(user_id=None, category="ALL"):
+        condition=dict()
+        if category in [Request.STATE_ACTIVE, Request.STATE_BILLED, Request.STATE_CANCELLED, Request.STATE_COMPLETE, Request.STATE_PAUSED]:
+            condition["state"] = [category, 's']
+        elif category!="ALL":
+            return None
+        if user_id is not None:
+            condition["created_by"]=[user_id, 's']
+        count_data = Database.count_rows_by_condition(Request.table_name, condition)
+        if count_data is not None and type(count_data)==list:
+            return count_data[0][0]
+        return None
+
 
 def __insert_dummy_request():
     Request()
