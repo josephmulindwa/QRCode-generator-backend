@@ -14,7 +14,6 @@ APP_FOLDER = 'APP'
 LOG_FILE = 'logs.txt'
 MAX_LOG_LINES = 100 # the maximum number of lines that can be logged
 CSV_FILE = 'qrcodes.csv'
-FOLDER_BATCH = 20128 # 21216
 MAX_ZIP_THREADS=8
 
 # db
@@ -68,6 +67,17 @@ def _zip_and_delete_folder(base_folder, target_folder_name):
     shutil.rmtree(target_folder_path)
     os.rename(pending_zipfilename, final_zipfilename)
 
+def get_text_samples(start_value, total, qr_serial_length, pre_string, pro_string):
+    '''returns sample strings depending on stats'''
+    first, last = start_value, start_value+total-1
+    first_serial, last_serial =  str(first), str(last)
+    if qr_serial_length>0:
+        first_serial = first_serial.zfill(qr_serial_length)
+        last_serial = last_serial.zfill(qr_serial_length)
+    first_string = pre_string+first_serial+pro_string
+    last_string = pre_string+last_serial+pro_string
+    return (first_string, last_string)
+
 def generate_qrcode(data, version=1, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=4, border=1, fgcolor=(0, 0, 0), bgcolor=(255, 255, 255)):
     """
     returns image of qrcode with data
@@ -93,7 +103,7 @@ def generate_qrcode(data, version=1, error_correction=qrcode.constants.ERROR_COR
     return img
 
 class QRCodeGenerator:
-    def __init__(self, name=None, version=1, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=4, border=1, folder_batch=FOLDER_BATCH, fgcolor=(0,0,0), bgcolor=(255,255,255)):
+    def __init__(self, name=None, version=1, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=4, border=1, folder_batch=500, fgcolor=(0,0,0), bgcolor=(255,255,255)):
         """
         @params
         

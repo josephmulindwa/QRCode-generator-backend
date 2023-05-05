@@ -40,23 +40,33 @@ class Database:
     def check_table_exists(table_name):
         query = "SHOW TABLES LIKE '{}'".format(table_name)
         tables = Database.execute(query, fecthable=True)
-        return (tables is not None)
+        return (tables is not None and len(tables)>0)
 
     @staticmethod
     def construct_where_clause(condition_dict):
-        # col:[val, type, boolean_binder]
+        """
+        condition_dict : dictionary
+            Signature : {col : [val, [boolean_binder, op_binder]}
+            Example : {'id':[3], 'name':['j', 'or'], 'age':[99, None, '!=']}
+            Resolves to : "id=3 or name='j' and age!=99"
+
+            Default boolean binder : `and`
+            Default op_binder : `=`
+        """
         clause = ""
         values = []
         cols = list(condition_dict.keys())
         for i in range(len(cols)):
             col = cols[i]
-            data = condition_dict[col]
-            _value = data[0]
-            _type = data[1]
-            _bool = data[2] if len(data)>2 else 'and'
-            s = "{}=%{} ".format(col, _type)
-            if i<len(cols)-1:
-                s += _bool+" "
+            args = condition_dict[col]
+            _value, _bbinder, _opbinder = args[0], 'and', '='
+            if len(args)>1 and args[1] is not None:
+                _bbinder=args[1]
+            if len(args)>2 and args[2] is not None:
+                _opbinder=args[2]
+            if i==0:
+                _bbinder=""
+            s = "{} {}{}%s ".format(_bbinder, col, _opbinder)
             clause += s
             values.append(_value)
         return clause, values

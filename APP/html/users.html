@@ -18,6 +18,58 @@
   <!-- Custom styles for this template-->
   <link href="css/sb-admin-2.min.css" rel="stylesheet">
 
+  <style>
+    .menu-nav {
+         
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .menu-item {
+      color: #FCC;
+      padding: 3px;
+    }
+    
+    .three-dots:after {
+      cursor: pointer;
+      color: #444;
+      content: '\2807';
+      font-size: 20px;
+      padding: 0 5px;
+    }
+    
+    a {
+      text-decoration: none;
+      color: white;
+    }
+    
+    a div {
+      padding: 2px;
+    }
+    
+    .dropdown {
+      position: absolute;
+      right: 10px;
+      background-color: #66D;
+      
+      outline: none;
+      opacity: 0;
+      z-index: -1;
+      max-height: 0;
+      transition: opacity 0.1s, z-index 0.1s, max-height 5s;
+    }
+    
+    .dropdown-container:focus {
+      outline: none;
+    }
+    
+    .dropdown-container:focus .dropdown {
+      opacity: 1;
+      z-index: 100;
+      max-height: 100vh;
+      transition: opacity 0.2s, z-index 0.2s, max-height 0.2s;
+    }
+    </style>
 </head>
 
 <body id="page-top">
@@ -100,6 +152,7 @@
                       <th>Username</th>
                       <th>Email</th>
                       <th>Approved</th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody id="table-body"></tbody>
@@ -201,10 +254,25 @@
       var content="";
       for(var i=0; i<data.length; i++){
         var obj = data[i];
+        var id_core=obj["username"];
+        var approved=Boolean(obj["approved"]);
+        var bgcolor = (approved) ? "#fff" : "#f00";
         var row = "<tr><td>"+obj["name"]+"</td>";
         row += "<td>"+obj["username"]+"</td>";
         row += "<td>"+obj["email"]+"</td>";
-        row += "<td>"+Boolean(obj["approved"])+"</td></tr>";
+        row += "<td style='background-color:"+bgcolor+";'>"+approved+"</td>";
+        // menu
+        row += `<td>
+          <div class="menu-nav">
+            <div class="dropdown-container" tabindex="-1">
+              <div class="three-dots"></div>
+              <div class="dropdown">
+                <div id='`+id_core+`' onclick="prepare_and_load_profile_view(this)" class="mr-2 ml-2 text-gray-400"><span> View </span></div>
+              </div>
+            </div>
+          </div>
+        </td>`;
+        row += "</tr>";
         
         content += row;
       }
@@ -261,6 +329,12 @@
       }
     }
     
+    async function prepare_and_load_profile_view(e){
+      e = e || window.event;
+      var src = e.target || e.srcElement;
+      window.localStorage.setItem("user-name", e.id);
+      window.location.href = "profile.html";
+    }
   </script>
 
 </body>

@@ -1,4 +1,4 @@
-import time
+import utils
 from database import Database
 
 class Request:
@@ -28,9 +28,10 @@ class Request:
         self.configuration_id=None
 
         Database.init()
-        self.__setup()
+        Request.init()
 
-    def __create_table(self):
+    @staticmethod
+    def __create_table():
         query = """CREATE TABLE {} (
             id INT PRIMARY KEY AUTO_INCREMENT,
             name VARCHAR(225),
@@ -48,15 +49,16 @@ class Request:
             configuration_id INT
         )""".format(Request.table_name, Request.max_string_length, Request.max_string_length)
         Database.execute(query)
-
-    def __setup(self):
+    
+    @staticmethod
+    def init():
         if not Database.check_table_exists(Request.table_name):
-            self.__create_table()
+            Request.__create_table()
     
     @staticmethod
     def fromName(name):
-        request = Request()
-        requests = Database.fetch_rows_by_condition(Request.table_name, {"name":[name, "s"]})
+        Request.init()
+        requests = Database.fetch_rows_by_condition(Request.table_name, {"name":[name]})
         if requests is not None:
             request = Request()
             request.fill_from_data(requests[0])
@@ -66,8 +68,8 @@ class Request:
 
     @staticmethod
     def fromId(id):
-        request = Request()
-        requests = Database.fetch_rows_by_condition(Request.table_name, {"id":[id, "s"]})
+        Request.init()
+        requests = Database.fetch_rows_by_condition(Request.table_name, {"id":[id]})
         if requests is not None:
             request = Request()
             request.fill_from_data(requests[0])
@@ -103,7 +105,7 @@ class Request:
             %s,%s,%s,%s,%s,%s
         )""".format(Request.table_name)
         if created_on is None:
-            created_on=time.strftime("%d/%m/%Y %H:%M", time.localtime())
+            created_on=utils.get_time_string()
         Database.execute(query, (name,description,start_value,total,pre_string,pro_string,csv_serial_length,
         qr_serial_length,created_by,progress,created_on,state,configuration_id))
     
@@ -118,11 +120,11 @@ class Request:
     def count_requests(user_id=None, category="ALL"):
         condition=dict()
         if category in [Request.STATE_ACTIVE, Request.STATE_BILLED, Request.STATE_CANCELLED, Request.STATE_COMPLETE, Request.STATE_PAUSED]:
-            condition["state"] = [category, 's']
+            condition["state"] = [category]
         elif category!="ALL":
             return None
         if user_id is not None:
-            condition["created_by"]=[user_id, 's']
+            condition["created_by"]=[user_id]
         count_data = Database.count_rows_by_condition(Request.table_name, condition)
         if count_data is not None and type(count_data)==list:
             return count_data[0][0]

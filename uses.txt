@@ -1,4 +1,3 @@
-Tables.init()
 @param docs
 req->delete files,pause, cancel, downloads, progress
 
@@ -13,12 +12,10 @@ my requests, user requests@admin
 
 sort requests by date
 
-from data-> None and len()>0
-
 to-do
--profile
 -create-unapproved-account
--edit user
+-edit user if you have password
+-edit user permissions
 
 -conditional renders
 -table-limit

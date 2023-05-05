@@ -23,12 +23,16 @@ class User:
         self.password=None
         self.created_by=None
         self.approved=None
+        
         Database.init()
-        Request()
-        Configuration()
+        Request.init()
+        Configuration.init()
+        UserPermission.init()
+        UserPermissionListing.init()
         self.__setup()
 
-    def __create_table(self):
+    @staticmethod
+    def __create_table():
         query = """CREATE table {} (
             id INT PRIMARY KEY AUTO_INCREMENT,
             name VARCHAR(225),
@@ -39,12 +43,22 @@ class User:
             approved INT
         )""".format(User.table_name)
         Database.execute(query)
-    
+
+    def __setup(self):
+        """setup after creating tables"""
+        if not Database.check_table_exists(User.table_name):
+            User.__create_table()
+            # add super user
+            permission_data = UserPermission.get_permission_codes()
+            permission_ids = UserPermission.get_ids_from_codes(permission_data)
+            self.add_user(User.superadmin['name'],User.superadmin['username'],User.superadmin['email'],
+                User.superadmin['password'],User.superadmin['created_by'],User.superadmin['approved'], permission_ids)
+
     @staticmethod
     def fromUsername(username):
         user = User()
-        users = Database.fetch_rows_by_condition(User.table_name, {"username":[username, "s"]})
-        if users is not None:
+        users = Database.fetch_rows_by_condition(User.table_name, {"username":[username]})
+        if users is not None and len(users)>0:
             user = User()
             user.fill_from_data(users[0])
         else:
@@ -54,7 +68,7 @@ class User:
     @staticmethod
     def fromEmail(email):
         user = User()
-        users = Database.fetch_rows_by_condition(User.table_name, {"email":[email, "s"]})
+        users = Database.fetch_rows_by_condition(User.table_name, {"email":[email]})
         if users is not None and len(users)>0:
             user = User()
             user.fill_from_data(users[0])
@@ -65,7 +79,7 @@ class User:
     @staticmethod
     def fromId(id):
         user = User()
-        users = Database.fetch_rows_by_condition(User.table_name, {"id":[id, "i"]})
+        users = Database.fetch_rows_by_condition(User.table_name, {"id":[id]})
         if users is not None and len(users)>0:
             user = User()
             user.fill_from_data(users[0])
@@ -85,21 +99,6 @@ class User:
 
     def fill_from_data(self, data):
         self.id,self.name,self.username,self.email,self.password,self.created_by,self.approved = data
-    
-    def __setup(self):
-        """setup after creating tables"""
-        if not Database.check_table_exists(User.table_name):
-            self.__create_table()
-            # atomic : add user
-            superadmin_id = self.add_user(User.superadmin['name'],User.superadmin['username'],User.superadmin['email'],
-                User.superadmin['password'],User.superadmin['created_by'],User.superadmin['approved'])
-            # add base permissions
-            UserPermission() #.init
-            permission_data = UserPermission.get_permission_codes()
-            permission_ids = UserPermission.get_ids_from_codes(permission_data)
-            userpermissionlisting = UserPermissionListing()
-            for permission_id in permission_ids:
-                UserPermissionListing.insert_listing(superadmin_id, permission_id)
             
     @staticmethod
     def fetch_rows_by_condition(condition):
@@ -109,22 +108,27 @@ class User:
             users = [User.fromData(data) for data in user_data]
         return users
 
-    def insert_user(self, name, username, email, password, created_by=None, approved=False):
-        """adds user"""
-        if created_by is None:
-            created_by = self.id
+    @staticmethod
+    def insert_user(name, username, email, password, created_by=None, approved=False):
+        """atomic insert user"""
         query = "INSERT INTO {}(name,username,email,password,created_by,approved) VALUES(%s,%s,%s,%s,%s,%s)".format(User.table_name)
         Database.execute(query, (name,username,email,password,created_by,approved))
     
-    def add_user(self, name, username, email, password, created_by=None, approved=False):
+    def add_user(self, name, username, email, password, created_by=None, approved=False, permission_ids=None):
         """adds user and sets up dependencies -> returns id"""
         # insert
-        self.insert_user(name,username,email,password,created_by,approved)
-        users = Database.fetch_rows_by_condition(User.table_name, {"username":[username, "s"]})
+        if created_by is None:
+            created_by = self.id
+        User.insert_user(name,username,email,password,created_by,approved)
+        users = Database.fetch_rows_by_condition(User.table_name, {"username":[username]})
         user_data = users[0]
         _id = user_data[0]
         # add config
         Configuration.insert_default_config(_id)
+        if permission_ids is None:
+            permission_ids=UserPermission.get_default_user_permission_ids()
+        for permission_id in permission_ids:
+            UserPermissionListing.insert_listing(_id, permission_id)
         return _id
 
     def grant_permissions(self, permission_list):
@@ -136,7 +140,7 @@ class User:
         gets the request with this name that belongs to the user
         """
         import request
-        rows = Database.fetch_rows_by_condition(table_name=Request.table_name, condition_dict={"name":[name, 's'], "created_by":[self.id, 's']})
+        rows = Database.fetch_rows_by_condition(table_name=Request.table_name, condition_dict={"name":[name], "created_by":[self.id]})
         if rows is not None and len(rows)>0:
             return rows[0]
         return None
@@ -150,19 +154,19 @@ class User:
         return Configuration.get_configuration_by_id_and_name(self.id, name)
 
     def get_requests(self, category=None):
-        condition = {"created_by":[self.id, 's']}
+        condition = {"created_by":[self.id]}
         if category is not None:
             if category=='ALL':
                 pass
             elif category=="INACTIVE":
-                condition["state"] = ["CANCELLED", "s"]
+                condition["state"] = ["CANCELLED"]
             else:
-                condition["state"] = [category, "s"]
+                condition["state"] = [category]
         requests = Request.fetch_rows_by_condition(condition)
         return requests
         
     def get_user(self, username):
-        users = User.fetch_rows_by_condition(condition={"username":[username, "s"]})
+        users = User.fetch_rows_by_condition(condition={"username":[username]})
         if users is not None and len(users)>0:
             return users[0]
         return None

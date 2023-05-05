@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, status
 from pydantic import BaseModel
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from typing import Generator
@@ -89,7 +89,6 @@ async def generate_codes(req : RequestForm):
     pre_string=req.pre_string
     pro_string=req.pro_string
     config_name=req.config_name
-    config_error_correct="ERROR_CORRECT_M"
 
     # decompose from token
     user = User.fromUsername(User.superadmin['username'])
@@ -152,46 +151,7 @@ async def get_progress(requestname : str):
             return "Nothing at all"
         else:
             return request.progress, request.total # if state==ACTIVE
-
-@app.post('/imagesample')
-async def get_image_samples(req : RequestForm):
-    '''returns sample image depending on stats'''
-    name=utils.clean_string(req.name)
-    start_value=req.start_value
-    total=req.count
-    description=req.description
-    qr_serial_length=req.qr_serial_length
-    csv_serial_length=req.csv_serial_length
-    pre_string=req.pre_string
-    pro_string=req.pro_string
-    config_name=req.config_name
-    config_error_correct="ERROR_CORRECT_M"
-    pass
-
-
-@api_app.post('/textsample')
-async def get_text_samples(req : RequestForm):
-    '''returns sample string depending on stats'''
-    name=utils.clean_string(req.name)
-    start_value=req.start_value
-    total=req.count
-    description=req.description
-    qr_serial_length=req.qr_serial_length
-    csv_serial_length=req.csv_serial_length
-    pre_string=req.pre_string
-    pro_string=req.pro_string
-    config_name=req.config_name
-    config_error_correct="ERROR_CORRECT_M"
-
-    first, last = start_value, start_value+total-1
-    first_serial, last_serial =  str(first), str(last)
-    if qr_serial_length>0:
-        first_serial = first_serial.zfill(qr_serial_length)
-        last_serial = last_serial.zfill(qr_serial_length)
-    first_string = pre_string+first_serial+pro_string
-    last_string = pre_string+last_serial+pro_string
-    return {"status":"success", "data":{"start":first_string, "end":last_string}}
-
+        
 @api_app.post('/login')
 async def login(req : LoginForm):
     identifier = req.identifier
@@ -262,11 +222,7 @@ async def download(user : str, file:str):
             return response
         return status.HTTP_404_NOT_FOUND
     except FileNotFoundError:
-        raise HTTPException(detail="File not found.", status_code=status.HTTP_404_NOT_FOUND)
-
-    if os.path.exists(zip_file):
-        return FileResponse(path=zip_file, media_type='application/octet-stream', filename=folder)
-    return status.HTTP_404_NOT_FOUND
+        return status.HTTP_404_NOT_FOUND
 
 
 @app.get('/cancel/{user}')
@@ -369,7 +325,7 @@ async def get_user_count():
         count = user.count_users()
         response = {"status":"success", "data":count}
         if count is None:
-            response = {"status":"failed", "message":"Unkown category `{}`".format(category)}
+            response = {"status":"failed", "message":"An error occured!"}
     return response
 
 @api_app.get("/users/search/{text}")
@@ -436,6 +392,121 @@ async def get_user_count(category : str):
 @api_app.get("/configurations/error_correction_levels")
 async def get_error_corrections():
     response = {"status":"success", "data":Configuration.error_correction_levels}
+    return response
+
+@api_app.post("/preview/image")
+async def get_preview_image(req : RequestForm):
+    start_value=req.start_value
+    total=req.count
+    qr_serial_length=req.qr_serial_length
+    pre_string=req.pre_string
+    pro_string=req.pro_string
+    config_name=req.config_name
+
+    # decompose from token
+    response = status.HTTP_404_NOT_FOUND
+    user = User.fromUsername(User.superadmin['username'])
+    if user is not None:
+        config = user.get_configuration_by_name(config_name)
+        if config is not None:
+            first_string, _ = apiutils.get_text_samples(start_value, total, qr_serial_length, pre_string, pro_string)
+            img = apiutils.generate_qrcode(first_string, version=config.version, 
+                                    error_correction=config.get_error_correction(), 
+                                    box_size=config.box_size, 
+                                    border=config.border, 
+                                    fgcolor=config.get_fore_color(), 
+                                    bgcolor=config.get_back_color()
+                                    )
+            if img is not None:
+                import io
+                import base64
+                b = io.BytesIO()
+                img.save(b, "PNG")
+                b.seek(0)
+                res = base64.b64encode(b.getvalue())
+
+                #headers = {
+                #   'Content-Disposition': 'attachment; filename="image.png"'
+                #}
+                response = {"status":"success", "data":res}
+    return response
+
+
+@api_app.post('/preview/text')
+async def get_preview_text(req : RequestForm):
+    '''returns sample string depending on stats'''
+    start_value=req.start_value
+    total=req.count
+    qr_serial_length=req.qr_serial_length
+    pre_string=req.pre_string
+    pro_string=req.pro_string
+
+    first_string, last_string = apiutils.get_text_samples(start_value, total, qr_serial_length, pre_string, pro_string)
+    return {"status":"success", "data":{"start":first_string, "end":last_string}}
+
+@api_app.post("/config/preview")
+async def get_config_preview(req : ConfigurationForm):
+    name=utils.clean_string(req.name)
+    version=req.version
+    folder_batch=req.folder_batch
+    error_correction=req.error_correction
+    box_size=req.box_size
+    border=req.border
+    fore_color=req.fore_color
+    back_color=req.back_color
+
+    # validate input
+    error=False
+    if len(name)==0 or version not in Configuration.versions or folder_batch<1 or error_correction not in Configuration.error_correction_levels or box_size<1 or border<1:
+        error=True
+    elif utils.hex_to_rgb(fore_color) is None or utils.hex_to_rgb(back_color) is None:
+        error=True
+
+    if error:
+        response = {"status":"failed", "message":"invalid input"}
+    else:
+        img = apiutils.generate_qrcode(data=name, version=version, 
+                                    error_correction=Configuration.get_error_correction_from_string(error_correction), 
+                                    box_size=box_size, 
+                                    border=border, 
+                                    fgcolor=Configuration.get_rgb_from_hex(fore_color), 
+                                    bgcolor=Configuration.get_rgb_from_hex(back_color)
+                                )
+        if img is not None:
+            import io
+            import base64
+            b = io.BytesIO()
+            img.save(b, "PNG")
+            b.seek(0)
+            res = base64.b64encode(b.getvalue())
+            response = {"status":"success", "data":res}
+        else:
+            response = {"status":"failed", "message":"An error occured!"}
+    return response
+
+@api_app.get("/configurations/get/{name}")
+def get_configuration(name : str):
+    response = {"status":"failed", "message":"Failed to fetch!"}
+    user = User.fromUsername(User.superadmin['username'])
+    if user is not None:
+        config = user.get_configuration_by_name(name)
+        if config is not None:
+            response = {"status":"success", "data":config.as_dict()}
+    return response
+
+@api_app.get("/users/get/{username}")
+def get_user_profile(username : str):
+    user = User.fromUsername(User.superadmin['username'])
+    response = {"status":"failed", "message":"Invalid token!"}
+    if user is not None:
+        requested_user = user.get_user(username)
+        if requested_user is None:
+            response = {"status":"failed", "message":"User doesn't exist!"}
+        else:
+            user_data=requested_user.as_dict()
+            del user_data["password"]
+            del user_data["id"]
+            response = {"status":"success", "data":user_data}
     return response
 
 def clean_after_self(days_time=30):

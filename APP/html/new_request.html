@@ -46,7 +46,6 @@
           <!-- Topbar Navbar -->
           <ul class="navbar-nav ml-auto">
             <div class="topbar-divider d-none d-sm-block"></div>
-
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -139,16 +138,12 @@
                   </div>
                 </div>
                 <hr>
-                    <div class="form-group row">
-                        <div><strong>PREVIEW</strong></div>
-                    </div>
-                    <div class="form-group row">
-                        <div class="col-sm-6 mb-3 mb-sm-0">
-                            <button type="button" class="form-control  btn btn-primary" id="exampleInputPassword">PREVIEW</button>
-                        </div>
-                        <div id="sample-image-div"></div>
-                        <div id="sample-text-div"></div>
-                    </div>
+                <div class="form-group row">
+                  <div class="col-sm-2"><strong>PREVIEW</strong></div>
+                </div>
+                <div><span>Previews are actual output size</span></div>
+                <div><image id="preview-image"></image></div>
+                <div><span id="preview-text"></span></div>
                 <hr>
                 <button type="button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Send Request</button>
                 
@@ -302,7 +297,7 @@
             alert(datajs["message"]);
         }else{
             alert(datajs["data"]);
-            window.location.href = "requests.html"
+            window.location.href = "my_requests.html"
         }
     }
 
@@ -321,6 +316,65 @@
       }
     }
     fetch_and_set_configurations();
+
+    // preview listeners
+    async function update_preview_section(){
+      var msg = validate_form();
+      if (msg!==null){
+        document.getElementById("preview-image").src = "";
+        document.getElementById("preview-text").innerText = "";
+          return;
+      }
+
+      var formdata = get_form_data();
+      var name=formdata[0];
+      var startvalue=formdata[1];
+      var count=formdata[2];
+      var description=formdata[3];
+      var qr_serial_length=formdata[4];
+      var csv_serial_length=formdata[5];
+      var pre_string = formdata[6];
+      var pro_string = formdata[7];
+      var config_name = formdata[8];
+
+      var jsondata = {
+          "name":name,
+          "start_value":startvalue,
+          "count":count,
+          "description":description,
+          "qr_serial_length":qr_serial_length,
+          "csv_serial_length":csv_serial_length,
+          "pre_string":pre_string,
+          "pro_string":pro_string,
+          "config_name":config_name
+      }
+
+      var res = await api_post("/preview/image", jsondata);
+      var data_js = await res.json();
+      if(data_js["status"]==="success"){
+        var data = data_js["data"];
+        var b = "data:image/gif;base64,"+data;
+        document.getElementById("preview-image").src = b;
+      }
+
+      var res = await api_post("/preview/text", jsondata);
+      let datajs = await res.json();
+      if(datajs["status"]==="success"){
+        console.log("RESPONSE :", datajs);
+        var data = datajs["data"];
+        var text = "SAMPLES : " + data["start"] + " | " + data["end"];
+        document.getElementById("preview-text").innerText = text;
+      }
+    }
+
+    document.getElementById("name").addEventListener("change", update_preview_section);
+    document.getElementById("qr_serial_length").addEventListener("change", update_preview_section);
+    document.getElementById("startvalue").addEventListener("change", update_preview_section);
+    document.getElementById("description").addEventListener("change", update_preview_section);
+    document.getElementById("count").addEventListener("change", update_preview_section);
+    document.getElementById("pre_string").addEventListener("change", update_preview_section);
+    document.getElementById("pro_string").addEventListener("change", update_preview_section);
+    document.getElementById("configurations").addEventListener("change", update_preview_section);
     
   </script>
 

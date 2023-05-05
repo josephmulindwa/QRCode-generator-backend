@@ -1,5 +1,6 @@
 import json
 import re
+import time
 
 class CollectionsManager:
     """
@@ -55,3 +56,6 @@ def hex_to_rgb(hex_string):
 def clean_string(string):
     s = '_'.join(re.findall('\w+', string))
     return s.lower()
+
+def get_time_string():
+    return time.strftime("%d/%m/%Y %H:%M", time.localtime())

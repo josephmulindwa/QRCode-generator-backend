@@ -77,7 +77,7 @@
 
           <!-- Page Heading -->
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">New Configuration</h1>
+            <h1 class="h3 mb-0 text-gray-800">View Configuration</h1>
           </div>
             <form id="mainform" onsubmit="return false">
                 <div class="form-group row">
@@ -85,43 +85,43 @@
                         <div>Name</div>
                     </div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="text" class="form-control form-control-user" id="name" placeholder="Name of configuration">
+                      <input type="text" class="form-control form-control-user" id="name" placeholder="Name of configuration" disabled="true">
                     </div>
                 </div>
                 <div class="form-group row">
                     <div class="col-sm-2">Folder Batch</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="folder_batch" value="1">
+                      <input type="number" class="form-control form-control-user" minlength="1" id="folder_batch" value="1" disabled="true">
                     </div>
                 </div>
                 <div class="form-group row">
-                    <div class="col-sm-2">Error Correction</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <select id="error_correction" class="btn"></select>
-                    </div>
-                </div>
+                  <div class="col-sm-2">Error Correction</div>
+                  <div class="col-sm-6 mb-3 mb-sm-0">
+                      <input type="text" class="form-control form-control-user" id="error_correction" disabled="true">
+                  </div>
+              </div>
                 <div class="form-group row">
                     <div class="col-sm-2">Box Size</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="box_size" value="1">
+                      <input type="number" class="form-control form-control-user" minlength="1" id="box_size" value="1" disabled="true">
                     </div>
                 </div>
                 <div class="form-group row">
                     <div class="col-sm-2">Border</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="text" class="form-control form-control-user" id="border">
+                      <input type="text" class="form-control form-control-user" id="border" disabled="true">
                     </div>
                 </div>
                 <div class="form-group row">
                     <div class="col-sm-2">Fore Color Hex</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                        <input type="text" class="form-control form-control-user" id="fgcolor">
+                        <input type="text" class="form-control form-control-user" id="fgcolor" disabled="true">
                     </div>
                 </div>
                 <div class="form-group row">
                     <div class="col-sm-2">Back Color Hex</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                        <input type="text" class="form-control form-control-user" id="bgcolor">
+                        <input type="text" class="form-control form-control-user" id="bgcolor" disabled="true">
                     </div>
                 </div>
 
@@ -131,9 +131,6 @@
                 </div>
                 <div><span>Previews are actual output size</span></div>
                 <div><image id="preview-image"></image></div>
-                <hr>
-                <button type="button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Save</button>
-                
               </form>
         </div>
         <!-- /.container-fluid -->
@@ -247,62 +244,6 @@
         return msg;
     }
 
-    async function send_data(){
-        var msg = validate_form();
-        if (msg!==null){
-            alert(msg);
-            return;
-        }
-
-        var formdata = get_form_data();
-        var name=formdata[0];
-        var version=formdata[1];
-        var folder_batch=formdata[2];
-        var error_correction=formdata[3];
-        var box_size=formdata[4];
-        var border=formdata[5];
-        var fgcolor=formdata[6];
-        var bgcolor=formdata[7];
-
-        var jsondata = {
-            "name":name,
-            "version":version,
-            "folder_batch":folder_batch,
-            "error_correction":error_correction,
-            "box_size":box_size,
-            "border":border,
-            "fore_color":fgcolor,
-            "back_color":bgcolor
-        }
-
-        var res = await api_post("/configurations/add", jsondata);
-        var datajs = await res.json();
-        console.log("DATAJS :", datajs);
-        if (datajs["status"]!=="success"){
-            alert(datajs["message"]);
-        }else{
-            alert(datajs["data"]);
-            window.location.href="configurations.html";
-        }
-    }
-
-    async function fetch_and_set_error_corrections(){
-      var res = await api_get("/configurations/error_correction_levels");
-      var datajs = await res.json();
-      if(datajs["status"]=="success"){
-        var levelhtml="";
-        var levels = datajs["data"];
-        for (var i=0; i<levels.length; i++){
-          var name = levels[i];
-          var inner = "<option value='"+name+"'>"+name+"</option>";
-          levelhtml+=inner;
-        }
-        document.getElementById("error_correction").innerHTML=levelhtml;
-      }
-    }
-    fetch_and_set_error_corrections();
-
-    // preview handlers
     async function update_preview_section(){
       var msg = validate_form();
       if (msg!==null){
@@ -340,13 +281,30 @@
       }
     }
 
-    document.getElementById("name").addEventListener("change", update_preview_section);
-    document.getElementById("folder_batch").addEventListener("change", update_preview_section);
-    document.getElementById("error_correction").addEventListener("change", update_preview_section);
-    document.getElementById("box_size").addEventListener("change", update_preview_section);
-    document.getElementById("border").addEventListener("change", update_preview_section);
-    document.getElementById("fgcolor").addEventListener("change", update_preview_section);
-    document.getElementById("bgcolor").addEventListener("change", update_preview_section);
+    async function fill_from_data(){
+      var name = window.localStorage.getItem("config-name");
+      if (validate_string(name)){
+        var res = await api_get("/configurations/get/"+name);
+        var datajs = await res.json();
+        console.log(datajs);
+
+        if (datajs["status"]==="success"){
+          data = datajs["data"];
+          mainform.name.value=data["name"];
+          mainform.folder_batch.value=data["folder_batch"];
+          mainform.error_correction.value=data["error_correction"];
+          mainform.box_size.value=data["box_size"];
+          mainform.border.value=data["border"];
+          mainform.fgcolor.value=data["fgcolor"];
+          mainform.bgcolor.value=data["bgcolor"];
+
+          update_preview_section();
+        }
+      }
+    }
+    fill_from_data();
+
+    
     
   </script>
 

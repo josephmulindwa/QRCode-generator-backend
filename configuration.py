@@ -1,5 +1,7 @@
 from database import Database
 import json
+import qrcode
+import utils
 
 class Configuration:
     table_name="configurations"
@@ -20,9 +22,10 @@ class Configuration:
         self.bgcolor=None
 
         Database.init()
-        self.__setup()
+        Configuration.init()
 
-    def __create_table(self):
+    @staticmethod
+    def __create_table():
         query = """CREATE TABLE {} (
             id INT PRIMARY KEY AUTO_INCREMENT,
             name VARCHAR(225),
@@ -36,15 +39,16 @@ class Configuration:
             bgcolor VARCHAR(10)
         )""".format(Configuration.table_name)
         Database.execute(query)
-    
-    def __setup(self):
+
+    @staticmethod
+    def init():
         if not Database.check_table_exists(Configuration.table_name):
-            self.__create_table()
+            Configuration.__create_table()
 
     @staticmethod
     def fromName(name):
-        configuration = Configuration()
-        configs = Database.fetch_rows_by_condition(Configuration.table_name, {"name":[name, "s"]})
+        Configuration.init()
+        configs = Database.fetch_rows_by_condition(Configuration.table_name, {"name":[name]})
         if configs is not None and len(configs)>0:
             configuration = Configuration()
             configuration.fill_from_data(configs[0])
@@ -54,8 +58,8 @@ class Configuration:
 
     @staticmethod
     def fromId(id):
-        configuration = Configuration()
-        configs = Database.fetch_rows_by_condition(Configuration.table_name, {"id":[id, "s"]})
+        Configuration.init()
+        configs = Database.fetch_rows_by_condition(Configuration.table_name, {"id":[id]})
         if configs is not None and len(configs)>0:
             configuration = Configuration()
             configuration.fill_from_data(configs[0])
@@ -98,7 +102,7 @@ class Configuration:
 
     @staticmethod
     def get_configurations_by_id(id):
-        rows = Database.fetch_rows_by_condition(Configuration.table_name, {"user_id":[id, "s"]})
+        rows = Database.fetch_rows_by_condition(Configuration.table_name, {"user_id":[id]})
         if rows is not None and len(rows)>0:
             configs = [Configuration.fromData(data) for data in rows]
             return configs
@@ -106,7 +110,7 @@ class Configuration:
 
     @staticmethod
     def get_configurations_by_name(name):
-        rows = Database.fetch_rows_by_condition(Configuration.table_name, {"name":[name, "s"]})
+        rows = Database.fetch_rows_by_condition(Configuration.table_name, {"name":[name]})
         if rows is not None and len(rows)>0:
             configs = [Configuration.fromData(data) for data in rows]
             return configs
@@ -114,7 +118,7 @@ class Configuration:
 
     @staticmethod
     def get_configuration_by_id_and_name(id, name):
-        rows = Database.fetch_rows_by_condition(Configuration.table_name, {"user_id":[id, "s"],"name":[name, "s"]})
+        rows = Database.fetch_rows_by_condition(Configuration.table_name, {"user_id":[id],"name":[name]})
         if rows is not None and len(rows)>0:
             config = Configuration.fromData(rows[0])
             return config
@@ -130,3 +134,27 @@ class Configuration:
         if configs is not None:
             return [Configuration.fromData(data)  for data in configs]
         return None
+    
+    @staticmethod
+    def get_error_correction_from_string(error_string):
+        try:
+            cst = eval("qrcode.constants.{}".format(error_string))
+            return cst
+        except:
+            return None
+    
+    @staticmethod
+    def get_rgb_from_hex(hex):
+        try:
+            return utils.hex_to_rgb(hex)
+        except:
+            return None
+
+    def get_error_correction(self):
+        return Configuration.get_error_correction_from_string(self.error_correction)
+    
+    def get_fore_color(self):
+        return Configuration.get_rgb_from_hex(self.fgcolor)
+
+    def get_back_color(self):
+        return Configuration.get_rgb_from_hex(self.bgcolor)
