@@ -5,6 +5,7 @@ from request import Request
 from configuration import Configuration
 
 class User:
+    default_approve_state=False
     table_name = "users" 
     superadmin = {
         "name":"SUPER ADMIN",
@@ -109,7 +110,7 @@ class User:
         return users
 
     @staticmethod
-    def insert_user(name, username, email, password, created_by=None, approved=False):
+    def insert_user(name, username, email, password, created_by=None, approved=default_approve_state):
         """atomic insert user"""
         query = "INSERT INTO {}(name,username,email,password,created_by,approved) VALUES(%s,%s,%s,%s,%s,%s)".format(User.table_name)
         Database.execute(query, (name,username,email,password,created_by,approved))
@@ -128,12 +129,16 @@ class User:
         if permission_ids is None:
             permission_ids=UserPermission.get_default_user_permission_ids()
         for permission_id in permission_ids:
-            UserPermissionListing.insert_listing(_id, permission_id)
+            UserPermissionListing.insert_listing(_id, permission_id, granted_by=self.id)
         return _id
 
-    def grant_permissions(self, permission_list):
-        # UserPermissionListing.get
-        pass
+    def grant_permissions(self, user_id, permission_ids):
+        if user_id==self.id:
+            return False
+        UserPermissionListing.delete_user_permissions(user_id)
+        for perm_id in permission_ids:
+            granted = UserPermissionListing.insert_listing(user_id, perm_id, self.id, check_exists=False)
+        return True
 
     def get_request(self, name):
         """
@@ -172,7 +177,8 @@ class User:
         return None
 
     def get_users(self):
-        users = User.fetch_rows_by_condition(dict())
+        # returns list of all users except self
+        users = User.fetch_rows_by_condition({"username":[self.username, None, "!="]})
         if users is None:
             return []
         return users
@@ -214,8 +220,13 @@ class User:
 
     def count_requests(self, category="ALL"):
         return Request.count_requests(user_id=self.id, category=category)
-
-
+    
+    def get_permissions(self):
+        listings = UserPermissionListing.get_listings_for_id(self.id)
+        return listings
+    
+    def get_permissions_for_user(self, user_id):
+        return UserPermissionListing.get_listings_for_id(user_id)
 
         
 

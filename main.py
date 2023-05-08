@@ -10,12 +10,14 @@ import apiutils
 import utils
 import threading
 import re
+import json
 import time
 import logging
 import authenticate
 from user import User
 from request import Request
 from configuration import Configuration
+from user_permission import UserPermission
 
 app = FastAPI(title="main app")
 api_app = FastAPI(title="api app")
@@ -64,6 +66,10 @@ class ConfigurationForm(BaseModel):
     border:int
     fore_color:str
     back_color:str
+
+class PermissionListForm(BaseModel):
+    username:str
+    listing:list
 
 html_app = FastAPI(name="html api")
 
@@ -508,6 +514,59 @@ def get_user_profile(username : str):
             del user_data["id"]
             response = {"status":"success", "data":user_data}
     return response
+
+@api_app.get("/user/permissions/{username}")
+def get_user_permissions(username : str):
+    user = User.fromUsername(User.superadmin['username'])
+    response = {"status":"failed", "message":"Invalid token!"}
+    if user is not None:
+        target_user = User.fromUsername(username)
+        if target_user is None:
+            response = {"status":"failed", "message":"User does not exist!"}
+        else:
+            permissions = user.get_permissions_for_user(target_user.id)
+            if permissions is not None:
+                data = [UserPermission.get_code_from_id(lst.permission_id) for lst in permissions]
+                response = {"status":"success", "data":data}
+            else:
+                response = {"status":"failed", "message":"An error occured. Failed to fetch!"}
+    return response
+
+@api_app.get("/permissions") # return self-permissions
+def get_user_permissions():
+    user = User.fromUsername(User.superadmin['username'])
+    response = {"status":"failed", "message":"Invalid token!"}
+    if user is not None:
+        permissions = user.get_permissions_for_user(user.id)
+        if permissions is not None:
+            data = [UserPermission.get_code_from_id(lst.permission_id) for lst in permissions]
+            response = {"status":"success", "data":data}
+        else:
+            response = {"status":"failed", "message":"An error occured. Failed to fetch!"}
+    return response
+
+@api_app.get("/permissions/list")
+def get_all_permissions():
+    data = UserPermission.get_permissions_as_dict()
+    return {"status":"success", "data":data}
+
+@api_app.post("/permissions/set")
+def set_permissions(req : PermissionListForm):
+    username = req.username
+    permissions = req.listing
+    permission_ids = UserPermission.get_ids_from_codes(permissions)
+
+    user = User.fromUsername(User.superadmin['username'])
+    response = {"status":"failed", "message":"Invalid token!"}
+    if user is not None:
+        exist_user = User.fromUsername(username)
+        if exist_user is None:
+            response = {"status":"failed", "message":"User doesn't exist!"}
+        else:
+            user.grant_permissions(exist_user.id, permission_ids)
+            response = {"status":"success", "data":"Added successfully!"}
+    return response
+    
 
 def clean_after_self(days_time=30):
     '''

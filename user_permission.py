@@ -58,6 +58,10 @@ class UserPermission:
     @staticmethod
     def get_permissions():
         return UserPermission.permission_list
+    
+    @staticmethod
+    def get_permissions_as_dict():
+        return [{"code":code,"name":name,"description":description} for code,name,description in UserPermission.permission_list]
 
     @staticmethod
     def get_permission_codes():
@@ -91,5 +95,5 @@ class UserPermission:
     
     @staticmethod
     def get_default_user_permission_ids():
-        codes = ["CREATE_REQUESTS", "VIEW_M_REQUESTS", "VIEW_M_PROFILE"]
+        codes = ["CREATE_REQUESTS", "VIEW_M_REQUESTS", "EDIT_M_PROFILE"]
         return UserPermission.get_ids_from_codes(codes)

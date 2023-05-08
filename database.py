@@ -98,3 +98,10 @@ class Database:
             where_id_clause = " created_by={} AND ".format(created_by)
         query = """SELECT * FROM {} WHERE {} {} LIKE '%{}%'""".format(table_name, where_id_clause, column, pattern)
         return Database.execute(query, [], fecthable=True)
+    
+    @staticmethod
+    def delete_rows_by_condition(table_name, condition_dict):
+        clause, values = Database.construct_where_clause(condition_dict)
+        where_clause = "WHERE "+clause if len(values) > 0 else ""
+        query = "DELETE FROM {} {}".format(table_name, where_clause)
+        return Database.execute(query, values, fecthable=False)

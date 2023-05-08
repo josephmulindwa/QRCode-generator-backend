@@ -45,22 +45,6 @@
 
           <!-- Topbar Navbar -->
           <ul class="navbar-nav ml-auto">
-            <li class="nav-item dropdown no-arrow">
-              <a class="nav-link dropdown-toggle" href="#" id="actionDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Actions</span>
-              </a>
-              <!-- Dropdown - User Information -->
-              <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                <span class="dropdown-item" onclick="window.location.href='edit_permission.html'">
-                  Edit Permissions
-                </span>
-                <div class="dropdown-divider"></div>
-                <span class="dropdown-item">
-                  Approve Account
-                </span>
-              </div>
-            </li>
-
             <div class="topbar-divider d-none d-sm-block"></div>
 
             <!-- Nav Item - User Information -->
@@ -93,26 +77,10 @@
 
           <!-- Page Heading -->
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Edit User</h1>
+            <h1 class="h3 mb-0 text-gray-800">Edit Permissions</h1>
           </div>
           <form id="mainform" onsubmit="return false" class="user">
-            <div class="form-group">
-                <input type="text" class="form-control form-control-user" id="name" placeholder="Name">
-            </div>
-            <div class="form-group">
-                <input type="text" class="form-control form-control-user" id="username" placeholder="Username">
-            </div>
-            <div class="form-group">
-                <input type="email" class="form-control form-control-user" id="email" placeholder="Email Address">
-            </div>
-            <div class="form-group row">
-                <div class="col-sm-6 mb-3 mb-sm-0">
-                <input type="password" class="form-control form-control-user" id="password" placeholder="Password">
-                </div>
-                <div class="col-sm-6">
-                <input type="password" class="form-control form-control-user" id="repassword" placeholder="Repeat Password">
-                </div>
-            </div>
+            <div id="permission-list"></div>
             <button type="button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Save</button>
             </form>
         </div>
@@ -183,85 +151,81 @@
     document.getElementById("main-title").innerText = name;
     document.getElementById("sidebar-name").innerText = name;
 
-    var get_form_data = function(){
-        var mainform = document.getElementById("mainform");
-        var name=mainform.name.value;
-        var username=mainform.username.value;
-        var email=mainform.email.value;
-        var password=mainform.password.value;
-        var repassword=mainform.repassword.value;
-        return [name,username,email,password,repassword];
-    }
-
-    function validate_form(){
-        formdata = get_form_data();
-        var name=formdata[0];
-        var username=formdata[1];
-        var email=formdata[2];
-        var password=formdata[3];
-        var repassword=formdata[4];
-
-        var msg = null;
-        if(!validate_string(name)){
-            msg = "Name not set correctly";
-        }else if(!validate_string(username) || username.indexOf(" ")>0){
-            msg = "Username not set correctly, ensure no spaces";
-        }else if(!validate_string(email)){
-            msg = "Email not set correctly";
-        }else if(!validate_string(password)){
-            msg = "Password not set correctly";
-        }else if(!validate_string(repassword)){
-            msg = "Re-entered password not set correctly";
-        }else if(password !== repassword){
-            msg = "Passwords don't match";
+    var get_checked_permissions = function(){
+        var checkeds = [];
+        var i=0;
+        while (true){
+          let el = document.getElementById("permission_"+i);
+          if (el && el!==null && el!==undefined){
+            if(el.checked){
+              checkeds.push(el.name);
+            }
+          }else{
+            break;
+          }
+          i++;
         }
-        return msg;
+        return checkeds;
     }
 
     async function send_data(){
-        var msg = validate_form();
-        if (msg!==null){
-            alert(msg);
-            return;
-        }
+      var checked_permission_codes = get_checked_permissions();
+      var username = window.localStorage.getItem("user-name");
+      console.log("username :"+username);
 
-        formdata = get_form_data();
-        var name=formdata[0];
-        var username=formdata[1];
-        var email=formdata[2];
-        var password=formdata[3];
+      var jsondata = {"username":username, "listing":checked_permission_codes}
+      //jsondata = JSON.stringify(jsondata);
 
-        var jsondata = {
-            "name":name,
-            "username":username,
-            "email":email,
-            "password":password,
-            "created_by":"superuser"
-        }
+      console.log("JSON :", jsondata);
 
-        /*var res = await api_post("/user/add", jsondata);
+        var res = await api_post("/permissions/set", jsondata);
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
             alert(datajs["message"]);
         }else{
             alert(datajs["data"]);
-            // go to some page
-        }*/
+            window.location.href="profile.html";
+        }
     }
 
     async function fill_from_data(){
       var username = window.localStorage.getItem("user-name");
+      console.log("username :"+username);
       if (validate_string(username)){
-        var res = await api_get("/users/get/"+username);
-        var datajs = await res.json();
-        console.log(datajs);
+        let permission_get_response = await api_get("/permissions");
+        var datajs = await permission_get_response.json();
 
         if (datajs["status"]==="success"){
-          data = datajs["data"];
-          mainform.name.value=data["name"];
-          mainform.email.value=data["email"];
-          mainform.username.value=data["username"];
+          var all_permissions = datajs["data"];
+          let user_permission_response = await api_get("/user/permissions/"+username);
+          datajs = await user_permission_response.json();
+          var granted_permissions = [];
+          if (datajs["status"]==="success"){
+            granted_permissions = datajs["data"];
+          }
+
+          var checkables =[];
+
+          var html_string="";
+          for (var i=0; i<all_permissions.length; i++){
+            var uid = "permission_"+i;
+            var perm_name=all_permissions[i];
+            var perm_code=all_permissions[i];
+            var checked = Boolean(granted_permissions.indexOf(perm_name)!=-1);
+            if (checked){
+              checkables.push(uid);
+            }
+            var row = '<div class="form-group">';
+            row+='<input mr-2 type="checkbox" value="'+uid+'" id="'+uid+'" name="'+perm_code+'">';
+            row+='<label ml-2 for="'+uid+'">'+perm_name+'</label>';
+            row+='</div>';
+            html_string+=row;
+          }
+          document.getElementById("permission-list").innerHTML=html_string;
+          for (var i=0; i<checkables.length; i++){
+            document.getElementById(checkables[i]).checked=true;
+          }
         }
       }
     }
