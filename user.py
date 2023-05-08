@@ -144,8 +144,7 @@ class User:
         """
         gets the request with this name that belongs to the user
         """
-        import request
-        rows = Database.fetch_rows_by_condition(table_name=Request.table_name, condition_dict={"name":[name], "created_by":[self.id]})
+        rows = Request.fetch_rows_by_condition(condition_dict={"name":[name], "created_by":[self.id]})
         if rows is not None and len(rows)>0:
             return rows[0]
         return None

@@ -1,12 +1,9 @@
 @param docs
-req->delete files,pause, cancel, downloads, progress
+req->delete files,pause, cancel, downloads, progress[view page]
 
-user->grant_permissions
 validate_permissions in backend on request
 
-try-catch all routes
-
-super-adminship and permissions is handled in self requests to return id=None or val
+*try-catch all routes
 
 my requests, user requests@admin
 

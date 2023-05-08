@@ -216,7 +216,21 @@
         row += "<td>"+obj["start"]+"</td>";
         row += "<td>"+obj["total"]+"</td>";
         row += "<td>"+obj["created_on"]+"</td>";
-        row += "<td>"+obj["state"]+"</td></tr>";
+        row += "<td>"+obj["state"]+"</td>";
+        // menu
+        row += `<td>
+          <div class="menu-nav">
+            <div class="dropdown-container" tabindex="-1">
+              <div class="three-dots"></div>
+              <div class="dropdown">
+                <div id='`+id_core+`' onclick="prepare_and_load_config_view(this)" class="mr-2 ml-2 text-gray-400">
+                  <span>View</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </td>`;
+        row += "</tr>";
         
         content += row;
       }

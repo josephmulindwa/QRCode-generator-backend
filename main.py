@@ -366,9 +366,23 @@ async def search_requests_by_text(text : str):
         response = {"status":"failed", "message":"No such user"}
     else:
         requests = user.find_requests_like(text)
-        response = {"status":"success", "data":[req.as_dict()  for req in requests]}
         if requests is None:
             response = {"status":"failed", "message":"An error occured on our end"}
+        else:
+            response = {"status":"success", "data":[req.as_dict()  for req in requests]}
+    return response
+
+@api_app.get("/requests/get/{name}")
+async def search_requests_by_text(name : str):
+    user = User.fromUsername(User.superadmin['username'])
+    if user is None:
+        response = {"status":"failed", "message":"No such user"}
+    else:
+        _request= user.get_request(name)
+        if _request is None:
+            response = {"status":"failed", "message":"An error occured on our end"}
+        else:
+             response = {"status":"success", "data":_request.as_dict()}
     return response
 
 @api_app.get("/configurations/search/{text}")
