@@ -1,14 +1,14 @@
 import utils
 from database import Database
 
-class Request:
+class Project:
     STATE_ACTIVE="ACTIVE"
     STATE_BILLED="BILLED"
     STATE_PAUSED="PAUSED"
     STATE_CANCELLED="CANCELLED"
     STATE_COMPLETE="COMPLETE"
 
-    table_name = "requests"
+    table_name = "projects"
     max_string_length=1000
 
     def __init__(self):
@@ -28,7 +28,7 @@ class Request:
         self.configuration_id=None
 
         Database.init()
-        Request.init()
+        Project.init()
 
     @staticmethod
     def __create_table():
@@ -47,35 +47,35 @@ class Request:
             progress INT,
             state VARCHAR(10),
             configuration_id INT
-        )""".format(Request.table_name, Request.max_string_length, Request.max_string_length)
+        )""".format(Project.table_name, Project.max_string_length, Project.max_string_length)
         Database.execute(query)
     
     @staticmethod
     def init():
-        if not Database.check_table_exists(Request.table_name):
-            Request.__create_table()
+        if not Database.check_table_exists(Project.table_name):
+            Project.__create_table()
     
     @staticmethod
     def fromName(name):
-        Request.init()
-        requests = Database.fetch_rows_by_condition(Request.table_name, {"name":[name]})
-        if requests is not None:
-            request = Request()
-            request.fill_from_data(requests[0])
+        Project.init()
+        projects = Database.fetch_rows_by_condition(Project.table_name, {"name":[name]})
+        if projects is not None:
+            project = Project()
+            project.fill_from_data(projects[0])
         else:
-            request = None
-        return request
+            project = None
+        return project
 
     @staticmethod
     def fromId(id):
-        Request.init()
-        requests = Database.fetch_rows_by_condition(Request.table_name, {"id":[id]})
-        if requests is not None:
-            request = Request()
-            request.fill_from_data(requests[0])
+        Project.init()
+        projects = Database.fetch_rows_by_condition(Project.table_name, {"id":[id]})
+        if projects is not None:
+            project = Project()
+            project.fill_from_data(projects[0])
         else:
-            request = None
-        return request
+            project = None
+        return project
 
     def fill_from_data(self, data):
         (self.id, self.name, self.description, self.start_value, self.total,\
@@ -84,7 +84,7 @@ class Request:
 
     @staticmethod
     def fromData(data):
-        req = Request()
+        req = Project()
         req.fill_from_data(data)
         return req
 
@@ -103,7 +103,7 @@ class Request:
         VALUES(
             %s,%s,%s,%s,%s,%s,%s,
             %s,%s,%s,%s,%s,%s
-        )""".format(Request.table_name)
+        )""".format(Project.table_name)
         if created_on is None:
             created_on=utils.get_time_string()
         Database.execute(query, (name,description,start_value,total,pre_string,pro_string,csv_serial_length,
@@ -111,38 +111,38 @@ class Request:
     
     @staticmethod
     def fetch_rows_by_condition(condition_dict):
-        requests = Database.fetch_rows_by_condition(Request.table_name, condition_dict)
-        if requests is not None and len(requests)>0:
-            return [Request.fromData(data) for data in requests]
+        projects = Database.fetch_rows_by_condition(Project.table_name, condition_dict)
+        if projects is not None and len(projects)>0:
+            return [Project.fromData(data) for data in projects]
         return None
     
     @staticmethod
-    def count_requests(user_id=None, category="ALL"):
+    def count_projects(user_id=None, category="ALL"):
         condition=dict()
-        if category in [Request.STATE_ACTIVE, Request.STATE_BILLED, Request.STATE_CANCELLED, Request.STATE_COMPLETE, Request.STATE_PAUSED]:
+        if category in [Project.STATE_ACTIVE, Project.STATE_BILLED, Project.STATE_CANCELLED, Project.STATE_COMPLETE, Project.STATE_PAUSED]:
             condition["state"] = [category]
         elif category!="ALL":
             return None
         if user_id is not None:
             condition["created_by"]=[user_id]
-        count_data = Database.count_rows_by_condition(Request.table_name, condition)
+        count_data = Database.count_rows_by_condition(Project.table_name, condition)
         if count_data is not None and type(count_data)==list:
             return count_data[0][0]
         return None
 
     @staticmethod
-    def find_requests_like(pattern, user_id=None):
-        requests = Database.fetch_rows_like(Request.table_name, "name", pattern, created_by=user_id)
-        if requests is not None:
-            return [Request.fromData(data) for data in requests]
+    def find_projects_like(pattern, user_id=None):
+        projects = Database.fetch_rows_like(Project.table_name, "name", pattern, created_by=user_id)
+        if projects is not None:
+            return [Project.fromData(data) for data in projects]
         return None
 
 
-def __insert_dummy_request():
-    Request()
-    Request.insert(
+def __insert_dummy_project():
+    Project()
+    Project.insert(
         name="first_req",
-        description="test request",
+        description="test project",
         start_value=0,
         total=1000,
         pre_string='SN',
@@ -152,6 +152,6 @@ def __insert_dummy_request():
         created_by=1
     )
 
-#__insert_dummy_request()
-#req = Request.fromName("first_req")
+#__insert_dummy_project()
+#req = Project.fromName("first_req")
 #print(req.name)

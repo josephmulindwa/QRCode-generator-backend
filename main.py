@@ -15,7 +15,7 @@ import time
 import logging
 import authenticate
 from user import User
-from request import Request
+from project import Project
 from configuration import Configuration
 from user_permission import UserPermission
 
@@ -34,8 +34,8 @@ app.add_middleware(
     allow_headers=['*']
     )
 
-class RequestForm(BaseModel):
-    '''class for generate request'''
+class ProjectForm(BaseModel):
+    '''class for generate project'''
     name:str
     start_value:int
     count:int
@@ -77,15 +77,15 @@ html_folder = os.path.join(apiutils.APP_FOLDER, "html")
 app.mount("/api", api_app)
 app.mount("/", StaticFiles(directory=html_folder, html=True), name="html")
 
-def get_user_request_key(username, requestname):
-    return "{}-{}".format(utils.clean_string(username),utils.clean_string(requestname))
+def get_user_project_key(username, projectname):
+    return "{}-{}".format(utils.clean_string(username),utils.clean_string(projectname))
 
 def get_data_from_file(file_path: str) -> Generator:
     with open(file=file_path, mode="rb") as file_like:
         yield file_like.read()
 
 @api_app.post('/generate')
-async def generate_codes(req : RequestForm):
+async def generate_codes(req : ProjectForm):
     name=utils.clean_string(req.name)
     start_value=req.start_value
     total=req.count
@@ -99,64 +99,54 @@ async def generate_codes(req : RequestForm):
     # decompose from token
     user = User.fromUsername(User.superadmin['username'])
     if user is None:
-        response = {"status":"failed", "message":"Request failed - no user!"}
+        response = {"status":"failed", "message":"Project failed - no user!"}
     else:
-        exist_request = user.get_request(name)
-        if exist_request is not None:
-            response = {"status":"failed", "message":"A request with this name already exists!"}
+        exist_project = user.get_project(name)
+        if exist_project is not None:
+            response = {"status":"failed", "message":"A project with this name already exists!"}
         else:
             config = user.get_configuration_by_name(config_name)
             if config is None:
-                response = {"status":"failed", "message":"Unkonwn configuration `{}`".format(config_name)}
+                response = {"status":"failed", "message":"Unknown configuration `{}`".format(config_name)}
             else:
-                # start goes here...
-                user.add_new_request(name,description,start_value,total,pre_string,pro_string,csv_serial_length,qr_serial_length,
-                    config.id,progress=0,created_on=None,state=Request.STATE_ACTIVE)
-                response = {"status":"success", "data":"Request added successfully!"}
+                user.add_new_project(name,description,start_value,total,pre_string,pro_string,csv_serial_length,qr_serial_length,
+                    config.id,progress=0,created_on=None,state=Project.STATE_ACTIVE)
+                key = get_user_project_key(user.username, projectname=name)
+                try:
+                    qrgen = apiutils.get_generator_from_configuration(key, config)
+                    apiutils.add_qrgen_object(key, qrgen)
+                    generate_fn = lambda : qrgen.generate(start_number=start_value, limit=total, qr_serial_length=qr_serial_length, 
+                        csv_serial_length=csv_serial_length, pre_string=pre_string, pro_string=pro_string)
+                    thread = threading.Thread(target=generate_fn, args=())
+                    thread.start()
+                    apiutils.log('{} : Generation started'.format(key))
+                    response = {"status":"success", "data":"Project added successfully!"}
+                except Exception as e:
+                    msg = "Error @api.generate : {}".format(e)
+                    apiutils.log(msg, key='error')
+                    print(msg)
+                    response = {"status":"failed", "message":"An error occured on our end!"}
     return response
 
-    key = get_user_request_key(user.username, name)
-    try:
-        qrgen = apiutils.get_generator_from_config(key, 
-            config={
-                'version':1,
-                'error_correction':"M",
-                "box_size":box_size,
-                "border":qr_padding,
-                "folder_batch":folder_batch,
-                "fgcolor":foreground_color,
-                "bgcolor":background_color
-            })
-        apiutils.add_qrgen_request(key, qrgen)
-        generate_fn = lambda : qrgen.generate(start_number=start, limit=total, qr_serial_length=qr_serial_length, 
-                        csv_serial_length=csv_serial_length, pre_string=pre_string, pro_string=pro_string)
-        thread = threading.Thread(target=generate_fn, args=())
-        thread.start()
-        apiutils.log('{} : Generation started'.format(username))
-        return 'Generation started.'
-    except Exception as e:
-        msg = "Error @api.generate : {}".format(e)
-        apiutils.log(msg, key='error')
-        print(msg)
-        return 'Server error! Oops, a critical error occured on our end.'
-
-@app.get('/progress/{requestname}')
-async def get_progress(requestname : str):
+@app.get('/progress/{projectname}')
+async def get_progress(projectname : str):
     # returns the progress of a specific user
     user = User.fromUsername(User.superadmin['username'])
     if user is None:
         return "Failed"
-    key = get_user_request_key(user.username, requestname)
+    key = get_user_project_key(user.username, projectname)
     qrgen_obj = apiutils.get_qrgen_object(key)
+    response = {"status":"failed", "message":"An error occured!"}
     if qrgen_obj is not None:
-        return qrgen_obj.progress,  qrgen_obj.total
+        response = {"status":"success", "data":{"progress":qrgen_obj.progress, "total":qrgen_obj.total}}
     else:
         # check database
-        request = Request.fromName(requestname)
-        if request is None:
-            return "Nothing at all"
+        project = Project.fromName(projectname)
+        if project is None:
+            response = {"status":"failed", "message":"No such project!"}
         else:
-            return request.progress, request.total # if state==ACTIVE
+            response = {"status":"success", "data":{"progress":project.progress, "total":project.total}}
+    return response
         
 @api_app.post('/login')
 async def login(req : LoginForm):
@@ -177,8 +167,8 @@ async def login(req : LoginForm):
     print(response)
     return response
 
-@api_app.get('/requests/{category}')
-async def get_downloads(category:str):
+@api_app.get('/projects/{category}')
+async def get_projects_by_category(category:str):
     categories = ["ALL", "BILLED", "ACTIVE", "COMPLETE", "INACTIVE"]
     if category not in categories:
         response = {"status":"failed", "message":"Unkown category `{}`".format(category)}
@@ -187,26 +177,28 @@ async def get_downloads(category:str):
         if user is None:
             response = {"status":"failed", "message":"No such user"}
         else:
-            requests = user.get_requests(category=category)
-            if requests is not None:
-                requests = [req.as_dict() for req in requests]
+            projects = user.get_projects(category=category)
+            if projects is not None:
+                projects = [req.as_dict() for req in projects]
             else:
-                requests = []
-            response = {"status":"success", "data":requests}
+                projects = []
+            response = {"status":"success", "data":projects}
     return response
 
-@app.get('/downloads/{user}')
-async def get_downloads(user : str):
+@app.get('/downloads/{user}/{projectname}')
+async def get_downloads(user : str, projectname : str):
     # returns a list to currently available zip files
     username = utils.get_hash(user)
-    user_obj = apiutils.get_user_object(username)
+    user_obj = User.fromUsername(username)
+    response = {"status":"failed", "message":"An error occured!"}
     if user_obj is None:
-        return status.HTTP_404_NOT_FOUND
-
-    userfolder = user_obj.targetfolder
-    files = os.listdir(userfolder)
-    downloadables = [(file, "{}/{}".format(username,file)) for file in files if len(re.findall('^\d+_\d+\.zip$', file))>0] 
-    return downloadables
+        response = {"status":"failed", "message":"User does not exist!"}
+    else:
+        userfolder = os.path.join(apiutils.ROOT, apiutils.APP_FOLDER, username, projectname)
+        files = os.listdir(userfolder)
+        downloadables = [(file, "{}/{}".format(username,file)) for file in files if len(re.findall('^\d+_\d+\.zip$', file))>0] 
+        response = {"status":"success", "data":downloadables}
+    return response
 
 @app.get('/download/{user}/{file}')
 async def download(user : str, file:str):
@@ -359,34 +351,34 @@ async def search_users_by_text(text : str):
             response = {"status":"failed", "message":"An error occured on our end"}
     return response
 
-@api_app.get("/requests/search/{text}")
-async def search_requests_by_text(text : str):
+@api_app.get("/projects/search/{text}")
+async def search_projects_by_text(text : str):
     user = User.fromUsername(User.superadmin['username'])
     if user is None:
         response = {"status":"failed", "message":"No such user"}
     else:
-        requests = user.find_requests_like(text)
-        if requests is None:
+        projects = user.find_projects_like(text)
+        if projects is None:
             response = {"status":"failed", "message":"An error occured on our end"}
         else:
-            response = {"status":"success", "data":[req.as_dict()  for req in requests]}
+            response = {"status":"success", "data":[req.as_dict()  for req in projects]}
     return response
 
-@api_app.get("/requests/get/{name}")
-async def search_requests_by_text(name : str):
+@api_app.get("/projects/get/{name}")
+async def search_projects_by_text(name : str):
     user = User.fromUsername(User.superadmin['username'])
     if user is None:
         response = {"status":"failed", "message":"No such user"}
     else:
-        _request= user.get_request(name)
-        if _request is None:
+        _project= user.get_project(name)
+        if _project is None:
             response = {"status":"failed", "message":"An error occured on our end"}
         else:
-             response = {"status":"success", "data":_request.as_dict()}
+             response = {"status":"success", "data":_project.as_dict()}
     return response
 
 @api_app.get("/configurations/search/{text}")
-async def search_requests_by_text(text : str):
+async def search_projects_by_text(text : str):
     user = User.fromUsername(User.superadmin['username'])
     if user is None:
         response = {"status":"failed", "message":"No such user"}
@@ -397,13 +389,13 @@ async def search_requests_by_text(text : str):
             response = {"status":"failed", "message":"An error occured on our end"}
     return response
 
-@api_app.get("/requests/count_all/{category}")
+@api_app.get("/projects/count_all/{category}")
 async def get_user_count(category : str):
     user = User.fromUsername(User.superadmin['username'])
     if user is None:
         response = {"status":"failed", "message":"No such user"}
     else:
-        count = user.count_all_requests(category=category)
+        count = user.count_all_projects(category=category)
         response = {"status":"success", "data":count}
         if count is None:
             response = {"status":"failed", "message":"Unkown category `{}`".format(category)}
@@ -415,7 +407,7 @@ async def get_error_corrections():
     return response
 
 @api_app.post("/preview/image")
-async def get_preview_image(req : RequestForm):
+async def get_preview_image(req : ProjectForm):
     start_value=req.start_value
     total=req.count
     qr_serial_length=req.qr_serial_length
@@ -453,7 +445,7 @@ async def get_preview_image(req : RequestForm):
 
 
 @api_app.post('/preview/text')
-async def get_preview_text(req : RequestForm):
+async def get_preview_text(req : ProjectForm):
     '''returns sample string depending on stats'''
     start_value=req.start_value
     total=req.count
@@ -580,7 +572,10 @@ def set_permissions(req : PermissionListForm):
             user.grant_permissions(exist_user.id, permission_ids)
             response = {"status":"success", "data":"Added successfully!"}
     return response
-    
+
+api_app.get("/test")
+def test():
+    pass
 
 def clean_after_self(days_time=30):
     '''

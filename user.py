@@ -1,7 +1,7 @@
 from database import Database
 from user_permission import UserPermission
 from user_permission_listing import UserPermissionListing
-from request import Request
+from project import Project
 from configuration import Configuration
 
 class User:
@@ -26,7 +26,7 @@ class User:
         self.approved=None
         
         Database.init()
-        Request.init()
+        Project.init()
         Configuration.init()
         UserPermission.init()
         UserPermissionListing.init()
@@ -140,24 +140,24 @@ class User:
             granted = UserPermissionListing.insert_listing(user_id, perm_id, self.id, check_exists=False)
         return True
 
-    def get_request(self, name):
+    def get_project(self, name):
         """
-        gets the request with this name that belongs to the user
+        gets the project with this name that belongs to the user
         """
-        rows = Request.fetch_rows_by_condition(condition_dict={"name":[name], "created_by":[self.id]})
+        rows = Project.fetch_rows_by_condition(condition_dict={"name":[name], "created_by":[self.id]})
         if rows is not None and len(rows)>0:
             return rows[0]
         return None
 
-    def add_new_request(self,name,description,start_value,total,pre_string,pro_string,csv_serial_length,qr_serial_length,
-            configuration_id,progress=0,created_on=None,state=Request.STATE_ACTIVE):
-        Request.insert(name,description,start_value,total,pre_string,pro_string,csv_serial_length,qr_serial_length,self.id,
+    def add_new_project(self,name,description,start_value,total,pre_string,pro_string,csv_serial_length,qr_serial_length,
+            configuration_id,progress=0,created_on=None,state=Project.STATE_ACTIVE):
+        Project.insert(name,description,start_value,total,pre_string,pro_string,csv_serial_length,qr_serial_length,self.id,
             progress,created_on,state,configuration_id)
 
     def get_configuration_by_name(self, name):
         return Configuration.get_configuration_by_id_and_name(self.id, name)
 
-    def get_requests(self, category=None):
+    def get_projects(self, category=None):
         condition = {"created_by":[self.id]}
         if category is not None:
             if category=='ALL':
@@ -166,8 +166,8 @@ class User:
                 condition["state"] = ["CANCELLED"]
             else:
                 condition["state"] = [category]
-        requests = Request.fetch_rows_by_condition(condition)
-        return requests
+        projects = Project.fetch_rows_by_condition(condition)
+        return projects
         
     def get_user(self, username):
         users = User.fetch_rows_by_condition(condition={"username":[username]})
@@ -196,8 +196,8 @@ class User:
             return users
         return None
 
-    def find_requests_like(self, pattern):
-        return Request.find_requests_like(pattern, self.id) #depending on permission
+    def find_projects_like(self, pattern):
+        return Project.find_projects_like(pattern, self.id) #depending on permission
 
     def find_configurations_like(self, pattern):
         return Configuration.find_configurations_like(pattern, self.id)
@@ -214,11 +214,11 @@ class User:
             return max(0, count_data[0][0]-1)
         return None
 
-    def count_all_requests(self, category="ALL"):
-        return Request.count_requests(user_id=None, category=category)
+    def count_all_projects(self, category="ALL"):
+        return Project.count_projects(user_id=None, category=category)
 
-    def count_requests(self, category="ALL"):
-        return Request.count_requests(user_id=self.id, category=category)
+    def count_projects(self, category="ALL"):
+        return Project.count_projects(user_id=self.id, category=category)
     
     def get_permissions(self):
         listings = UserPermissionListing.get_listings_for_id(self.id)
@@ -228,6 +228,3 @@ class User:
         return UserPermissionListing.get_listings_for_id(user_id)
 
         
-
-#user = User()
-#user.add_new_request("n", "", 0, 200,"", "", 3, 5, configuration_id=1)

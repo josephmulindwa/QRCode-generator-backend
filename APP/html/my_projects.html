@@ -17,6 +17,58 @@
 
   <!-- Custom styles for this template-->
   <link href="css/sb-admin-2.min.css" rel="stylesheet">
+  <style>
+    .menu-nav {
+         
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .menu-item {
+      color: #FCC;
+      padding: 3px;
+    }
+    
+    .three-dots:after {
+      cursor: pointer;
+      color: #444;
+      content: '\2807';
+      font-size: 20px;
+      padding: 0 5px;
+    }
+    
+    a {
+      text-decoration: none;
+      color: white;
+    }
+    
+    a div {
+      padding: 2px;
+    }
+    
+    .dropdown {
+      position: absolute;
+      right: 10px;
+      background-color: #66D;
+      
+      outline: none;
+      opacity: 0;
+      z-index: -1;
+      max-height: 0;
+      transition: opacity 0.1s, z-index 0.1s, max-height 5s;
+    }
+    
+    .dropdown-container:focus {
+      outline: none;
+    }
+    
+    .dropdown-container:focus .dropdown {
+      opacity: 1;
+      z-index: 100;
+      max-height: 100vh;
+      transition: opacity 0.2s, z-index 0.2s, max-height 0.2s;
+    }
+    </style>
 
 </head>
 
@@ -84,7 +136,7 @@
         <div class="container-fluid">
 
           <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Requests</h1>
+          <h1 class="h3 mb-2 text-gray-800">Projects</h1>
 
           <!-- DataTales Example -->
           <div class="card shadow mb-4">
@@ -93,11 +145,11 @@
                   Select Category
                 </button>
                 <div class="dropdown-menu animated--fade-in" aria-labelledby="dropdownMenuButton">
-                  <span class="dropdown-item">All Requests</span>
-                  <span class="dropdown-item">Active Requests</span>
-                  <span class="dropdown-item">Billed Requests</span>
-                  <span class="dropdown-item">Complete Requests</span>
-                  <span class="dropdown-item">Inactive Requests</span>
+                  <span class="dropdown-item">All Projects</span>
+                  <span class="dropdown-item">Active Projects</span>
+                  <span class="dropdown-item">Billed Projects</span>
+                  <span class="dropdown-item">Complete Projects</span>
+                  <span class="dropdown-item">Inactive Projects</span>
                 </div>
             </div>
             
@@ -211,6 +263,8 @@
       var content="";
       for(var i=0; i<data.length; i++){
         var obj = data[i];
+        var id_core=obj["name"];
+
         var row = "<tr><td>"+obj["name"]+"</td>";
         row += "<td>"+obj["description"]+"</td>";
         row += "<td>"+obj["start"]+"</td>";
@@ -223,8 +277,14 @@
             <div class="dropdown-container" tabindex="-1">
               <div class="three-dots"></div>
               <div class="dropdown">
-                <div id='`+id_core+`' onclick="prepare_and_load_config_view(this)" class="mr-2 ml-2 text-gray-400">
+                <div id='`+id_core+`' onclick="prepare_and_load_view(this)" class="mr-2 ml-2 text-gray-400">
                   <span>View</span>
+                </div>
+                <div class="mr-2 ml-2 text-gray-400">
+                  <span>Pause</span>
+                </div>
+                <div class="mr-2 ml-2 text-gray-400">
+                  <span>Cancel</span>
                 </div>
               </div>
             </div>
@@ -248,15 +308,15 @@
         var start=qdata[1];
         var limit=qdata[2];
 
-        console.log("MAKING REQUEST");
-        var res = await api_get("/requests/"+category);
+        console.log("MAKING Project");
+        var res = await api_get("/projects/"+category);
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
           alert(datajs["message"]);
         }else{
-          var requests = datajs["data"];
-          var rows = table_from_data(requests);
+          var projects = datajs["data"];
+          var rows = table_from_data(projects);
           var table_body = document.getElementById("table-body");
           table_body.innerHTML = rows;
         }
@@ -287,7 +347,7 @@
         return;
       }
       
-      var res = await api_get("/requests/search/"+text);
+      var res = await api_get("/projects/search/"+text);
       var datajs = await res.json();
       console.log("DATAJS :", datajs);
       if (datajs["status"]!=="success"){
@@ -298,6 +358,15 @@
         var table_body = document.getElementById("table-body");
         table_body.innerHTML = rows;
       }
+    }
+
+    async function prepare_and_load_view(e){
+      e = e || window.event;
+      var src = e.target || e.srcElement;
+
+      console.log("E :", e.id);
+      window.localStorage.setItem("project-name", e.id);
+      window.location.href = "view_project.html";
     }
     
   </script>

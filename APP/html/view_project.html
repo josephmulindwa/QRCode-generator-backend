@@ -45,7 +45,28 @@
 
           <!-- Topbar Navbar -->
           <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown no-arrow">
+              <a class="nav-link dropdown-toggle" href="#" id="actionDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Actions</span>
+              </a>
+              <!-- Dropdown - User Information -->
+              <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                <span class="dropdown-item" onclick="window.location.href='downloads.html'">
+                  Downloads
+                </span>
+                <div class="dropdown-divider"></div>
+                <span class="dropdown-item" onclick="">
+                  Pause
+                </span>
+                <div class="dropdown-divider"></div>
+                <span class="dropdown-item" onclick="">
+                  Cancel
+                </span>
+              </div>
+            </li>
+
             <div class="topbar-divider d-none d-sm-block"></div>
+
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -76,78 +97,75 @@
 
           <!-- Page Heading -->
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">New Request</h1>
+            <h1 class="h3 mb-0 text-gray-800">View Project</h1>
           </div>
             <form id="mainform" onsubmit="return false">
-                <div class="form-group row">
-                    <div class="col-sm-2">
-                        <div>Request Name</div>
-                    </div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="text" class="form-control form-control-user" id="name" placeholder="Name to identify this request...">
-                    </div>
+              <div class="form-group row">
+                <div class="col-sm-2">
+                    <div>Project Name</div>
                 </div>
-                <div class="form-group row">
-                  <div class="col-sm-2">Description</div>
-                  <div class="col-sm-6 mb-3 mb-sm-0">
-                    <input type="text" cols="2" class="form-control form-control-user" id="description" placeholder="Description">
-                  </div>
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                  <input type="text" class="form-control form-control-user" id="name" disabled="true">
+                </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-sm-2">Description</div>
+              <div class="col-sm-6 mb-3 mb-sm-0">
+                <input type="text" cols="2" class="form-control form-control-user" id="description" placeholder="Description" disabled="true">
               </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">
-                        <div>Start Value</div>
-                    </div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="startvalue" value="0">
-                    </div>
+          </div>
+            <div class="form-group row">
+                <div class="col-sm-2">
+                    <div>Start Value</div>
                 </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">Count</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="count" value="1">
-                    </div>
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                  <input type="number" class="form-control form-control-user" minlength="1" id="startvalue" value="0" disabled="true">
                 </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">QR Serial Length</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="qr_serial_length" value="1">
-                    </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-2">Count</div>
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                  <input type="number" class="form-control form-control-user" minlength="1" id="count" value="1" disabled="true">
                 </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">CSV Serial Length</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="number" class="form-control form-control-user" minlength="1" id="csv_serial_length" value="1">
-                    </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-2">QR Serial Length</div>
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                  <input type="number" class="form-control form-control-user" minlength="1" id="qr_serial_length" value="1" disabled="true">
                 </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">Pre String</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                      <input type="text" class="form-control form-control-user" id="pre_string">
-                    </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-2">CSV Serial Length</div>
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                  <input type="number" class="form-control form-control-user" minlength="1" id="csv_serial_length" value="1" disabled="true">
                 </div>
-                <div class="form-group row">
-                    <div class="col-sm-2">Pro String</div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                        <input type="text" class="form-control form-control-user" id="pro_string">
-                    </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-2">Pre String</div>
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                  <input type="text" class="form-control form-control-user" id="pre_string" disabled="true">
                 </div>
-                <div class="form-group row">
-                  <div class="col-sm-2">Configuration</div>
-                  <div class="col-sm-6 mb-3 mb-sm-0">
-                    <select id="configurations" class="btn"></select>
-                  </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-2">Pro String</div>
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                    <input type="text" class="form-control form-control-user" id="pro_string" disabled="true">
                 </div>
-                <hr>
-                <div class="form-group row">
-                  <div class="col-sm-2"><strong>PREVIEW</strong></div>
-                </div>
-                <div><span>Previews are actual output size</span></div>
-                <div><image id="preview-image"></image></div>
-                <div><span id="preview-text"></span></div>
-                <hr>
-                <button type="button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Send Request</button>
-                
-              </form>
+            </div>
+            <div class="form-group row">
+              <div class="col-sm-2">Configuration</div>
+              <div class="col-sm-6 mb-3 mb-sm-0">
+                  <input type="text" class="form-control form-control-user" id="configurations" disabled="true">
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <div class="col-sm-2"><strong>PREVIEW</strong></div>
+            </div>
+            <div><span>Previews are actual output size</span></div>
+            <div><image id="preview-image"></image></div>
+            <div><span id="preview-text"></span></div>
+          </form>
         </div>
         <!-- /.container-fluid -->
 
@@ -213,7 +231,7 @@
     console.log("name :", name);
 
     // FILLING PAGE
-    document.getElementById("main-title").innerText = name;
+    document.getElementById("main-title").innerText = "QR Code Generator";
     document.getElementById("sidebar-name").innerText = name;
 
     var get_form_data = function(){
@@ -231,101 +249,7 @@
         return [name,startvalue,count,description,qr_serial_length,csv_serial_length,pre_string,pro_string,config_name];
     }
 
-    function validate_form(){
-        formdata = get_form_data();
-        var name=formdata[0];
-        var startvalue=formdata[1];
-        var count=formdata[2];
-        var description=formdata[3];
-        var qr_serial_length=formdata[4];
-        var csv_serial_length=formdata[5];
-        var pre_string = formdata[6];
-        var pro_string = formdata[7];
-        var config_name = formdata[8];
-
-        var msg = null;
-        if(!validate_string(name)){
-            msg = "Name not set correctly";
-        }else if(!validate_string(startvalue) || startvalue<0){
-            msg = "Start Value not set correctly";
-        }else if(!validate_string(count) || count<0){
-            msg = "Count not set correctly";
-        }else if(!validate_string(qr_serial_length)){
-            msg = "QR Serial not set correctly";
-        }else if(!validate_string(csv_serial_length)){
-            msg = "CSV Serial not set correctly";
-        }else if(!validate_string(config_name)){
-            msg = "Config name not set correctly";
-        }
-        return msg;
-    }
-
-    async function send_data(){
-        var msg = validate_form();
-        if (msg!==null){
-            alert(msg);
-            return;
-        }
-
-        var formdata = get_form_data();
-        var name=formdata[0];
-        var startvalue=formdata[1];
-        var count=formdata[2];
-        var description=formdata[3];
-        var qr_serial_length=formdata[4];
-        var csv_serial_length=formdata[5];
-        var pre_string = formdata[6];
-        var pro_string = formdata[7];
-        var config_name = formdata[8];
-
-        var jsondata = {
-            "name":name,
-            "start_value":startvalue,
-            "count":count,
-            "description":description,
-            "qr_serial_length":qr_serial_length,
-            "csv_serial_length":csv_serial_length,
-            "pre_string":pre_string,
-            "pro_string":pro_string,
-            "config_name":config_name
-        }
-
-        var res = await api_post("/generate", jsondata);
-        var datajs = await res.json();
-        console.log("DATAJS :", datajs);
-        if (datajs["status"]!=="success"){
-            alert(datajs["message"]);
-        }else{
-            alert(datajs["data"]);
-            window.location.href = "my_requests.html"
-        }
-    }
-
-    async function fetch_and_set_configurations(){
-      var res = await api_get("/configurations/list");
-      var datajs = await res.json();
-      if(datajs["status"]=="success"){
-        var confightml="";
-        var configs = datajs["data"];
-        for (var i=0; i<configs.length; i++){
-          var name = configs[i]["name"];
-          var inner = "<option value='"+name+"'>"+name+"</option>";
-          confightml+=inner;
-        }
-        document.getElementById("configurations").innerHTML=confightml;
-      }
-    }
-    fetch_and_set_configurations();
-
-    // preview listeners
     async function update_preview_section(){
-      var msg = validate_form();
-      if (msg!==null){
-        document.getElementById("preview-image").src = "";
-        document.getElementById("preview-text").innerText = "";
-          return;
-      }
-
       var formdata = get_form_data();
       var name=formdata[0];
       var startvalue=formdata[1];
@@ -335,7 +259,7 @@
       var csv_serial_length=formdata[5];
       var pre_string = formdata[6];
       var pro_string = formdata[7];
-      var config_name = formdata[8];
+      var config_name = "default_config";
 
       var jsondata = {
           "name":name,
@@ -367,14 +291,32 @@
       }
     }
 
-    document.getElementById("name").addEventListener("change", update_preview_section);
-    document.getElementById("qr_serial_length").addEventListener("change", update_preview_section);
-    document.getElementById("startvalue").addEventListener("change", update_preview_section);
-    document.getElementById("description").addEventListener("change", update_preview_section);
-    document.getElementById("count").addEventListener("change", update_preview_section);
-    document.getElementById("pre_string").addEventListener("change", update_preview_section);
-    document.getElementById("pro_string").addEventListener("change", update_preview_section);
-    document.getElementById("configurations").addEventListener("change", update_preview_section);
+    async function fill_from_data(){
+      var name = window.localStorage.getItem("project-name");
+      if (validate_string(name)){
+        var res = await api_get("/projects/get/"+name);
+        var datajs = await res.json();
+        console.log(datajs);
+
+        if (datajs["status"]==="success"){
+          data = datajs["data"];
+          mainform.name.value=data["name"];
+          mainform.startvalue.value=data["start"];
+          mainform.count.value=data["total"];
+          mainform.description.value=data["description"];
+          mainform.qr_serial_length.value=data["qr_serial_length"];
+          mainform.csv_serial_length.value=data["csv_serial_length"];
+          mainform.pre_string.value = data["pre_string"];
+          mainform.pro_string.value = data["pro_string"];
+          // mainform.config_name.value = data["config_name"];
+
+          update_preview_section();
+        }
+      }
+    }
+    fill_from_data();
+
+    
     
   </script>
 

@@ -23,7 +23,7 @@ def add_qrgen_object(key, obj):
     global ACTIVE_OBJECTS
     ACTIVE_OBJECTS[key] = obj
 
-def remove_qrgen_request(key):
+def remove_qrgen_project(key):
     global ACTIVE_OBJECTS
     if key in ACTIVE_OBJECTS:
         del ACTIVE_OBJECTS[key]
@@ -103,10 +103,9 @@ def generate_qrcode(data, version=1, error_correction=qrcode.constants.ERROR_COR
     return img
 
 class QRCodeGenerator:
-    def __init__(self, name=None, version=1, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=4, border=1, folder_batch=500, fgcolor=(0,0,0), bgcolor=(255,255,255)):
+    def __init__(self, name=None, version=1, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=4, border=1, folder_batch=500, fgcolor=(0,0,0), bgcolor=(255,255,255), folder=None):
         """
         @params
-        
         """
         self.version = version
         self.error_correction = error_correction
@@ -122,9 +121,11 @@ class QRCodeGenerator:
         self.folder_batch = folder_batch
         self.fgcolor = fgcolor
         self.bgcolor = bgcolor
-        self.targetfolder=os.path.join(ROOT, OUTPUT_FOLDER, "__temp__")
+        self.targetfolder=os.path.join(ROOT, OUTPUT_FOLDER)
+        if folder is not None:
+            self.targetfolder=os.path.join(self.targetfolder, folder)
         if self.name is not None:
-            self.targetfolder=os.path.join(ROOT, OUTPUT_FOLDER, name)
+            self.targetfolder=os.path.join(self.targetfolder, name)
 
         if os.path.exists(self.targetfolder):
             shutil.rmtree(self.targetfolder)
@@ -238,15 +239,15 @@ class QRCodeGenerator:
     def is_complete(self):
         return self.total==self.progress  # and zipping is done
 
-def get_generator_from_config(name, config):
+def get_generator_from_configuration(name, config):
     # generates a generator object that conforms to the config  
-    _version = config['version']
-    _error_correction = eval("qrcode.constants.{}".format(config['error_correction']))
-    _box_size = config['box_size']
-    _border = config['border']
-    _folder_batch=config['folder_batch']
-    _fg_color = config['fgcolor']
-    _bg_color = config['bgcolor']
+    _version = config.version
+    _error_correction = config.get_error_correction()
+    _box_size = config.box_size
+    _border = config.border
+    _folder_batch=config.folder_batch
+    _fg_color = config.get_fore_color()
+    _bg_color = config.get_back_color()
 
     generator = QRCodeGenerator(
         name=name, 

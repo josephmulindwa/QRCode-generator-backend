@@ -117,14 +117,14 @@
               </div>
             </div>
 
-            <!-- Requests (Total) -->
+            <!-- Projects (Total) -->
             <div class="col-xl-3 col-md-6 mb-4">
               <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Requests (Total)</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800" id="request-count-all">0</div>
+                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Projects (Total)</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800" id="project-count-all">0</div>
                     </div>
                     <div class="col-auto">
                       <i class="fas fa-clone fa-2x text-gray-300"></i>
@@ -134,14 +134,14 @@
               </div>
             </div>
 
-            <!-- Requests (Billed) -->
+            <!-- Projects (Billed) -->
             <div class="col-xl-3 col-md-6 mb-4">
               <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Requests (Billed)</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800" id="request-count-billed">0</div>
+                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Projects (Billed)</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800" id="project-count-billed">0</div>
                     </div>
                     <div class="col-auto">
                       <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -151,14 +151,14 @@
               </div>
             </div>
 
-            <!-- Pending Requests -->
+            <!-- Pending Projects -->
             <div class="col-xl-3 col-md-6 mb-4">
               <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Requests</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800" id="request-count-active">0</div>
+                      <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Projects</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800" id="project-count-active">0</div>
                     </div>
                     <div class="col-auto">
                       <i class="fas fa-clone fa-2x text-gray-300"></i>
@@ -247,7 +247,7 @@
     }
 
     async function super_fetch_and_set_request_count(category, target_id){
-      let response = await api_get("/requests/count_all/"+category);
+      let response = await api_get("/projects/count_all/"+category);
       var datajs = await response.json();
       var count=0;
       if (datajs["status"]=="success"){
@@ -257,9 +257,9 @@
     }
 
     super_fetch_and_set_user_count();
-    super_fetch_and_set_request_count("ALL", "request-count-all");
-    super_fetch_and_set_request_count("BILLED", "request-count-billed");
-    super_fetch_and_set_request_count("ACTIVE", "request-count-active");
+    super_fetch_and_set_request_count("ALL", "project-count-all");
+    super_fetch_and_set_request_count("BILLED", "project-count-billed");
+    super_fetch_and_set_request_count("ACTIVE", "project-count-active");
   </script>
 
 </body>

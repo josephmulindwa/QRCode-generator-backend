@@ -10,14 +10,14 @@ class UserPermission:
         ["VIEW_M_PERMISSIONS", "VIEW PERSONAL PERMISSIONS", "View personal permissions"],
         ["APPROVE_USERS", "APPROVE USERS", "Approve user accounts"],
         ["CREATE_USERS","CREATE USERS", "Create user accounts"],
-        ["CREATE_REQUESTS", "CREATE REQUESTS","Make Requests"],
+        ["CREATE_PROJECTS", "CREATE PROJECTS","Make projects"],
         ["VIEW_USERS", "VIEW USERS", "View Users"],
-        ["VIEW_M_REQUESTS", "VIEW PERSONAL REQUESTS", "View personal requests"],
-        ["VIEW_U_REQUESTS", "VIEW USER REQUESTS", "View user requests"],
+        ["VIEW_M_PROJECTS", "VIEW PERSONAL PROJECTS", "View personal projects"],
+        ["VIEW_U_PROJECTS", "VIEW USER PROJECTS", "View user projects"],
         ["EDIT_M_PROFILE", "EDIT PERSONAL PROFILE", "Edit personal profile"],
         ["EDIT_U_PROFILES", "EDIT USER PROFILES", "Edit user profiles"],
-        ["BILL_REQUESTS", "BILL REQUESTS", "Bill user requests"],
-        ["DELETE_REQUESTS", "DELETE REQUESTS", "Delete user requests"],
+        ["BILL_PROJECTS", "BILL PROJECTS", "Bill user projects"],
+        ["DELETE_PROJECTS", "DELETE PROJECTS", "Delete user projects"],
         ["DELETE_USERS", "DELETE USERS","Delete User Accounts"]
     ]
 
@@ -95,5 +95,5 @@ class UserPermission:
     
     @staticmethod
     def get_default_user_permission_ids():
-        codes = ["CREATE_REQUESTS", "VIEW_M_REQUESTS", "EDIT_M_PROFILE"]
+        codes = ["CREATE_PROJECTS", "VIEW_M_PROJECTS", "EDIT_M_PROFILE"]
         return UserPermission.get_ids_from_codes(codes)

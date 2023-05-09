@@ -1,13 +1,11 @@
 @param docs
 req->delete files,pause, cancel, downloads, progress[view page]
 
-validate_permissions in backend on request
-
 *try-catch all routes
 
-my requests, user requests@admin
+my projects, user projects@admin
 
-sort requests by date
+sort projects by date
 
 to-do
 -create-unapproved-account

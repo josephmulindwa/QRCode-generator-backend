@@ -305,8 +305,8 @@
         if (datajs["status"]!=="success"){
           alert(datajs["message"]);
         }else{
-          var requests = datajs["data"];
-          var rows = table_from_data(requests);
+          var projects = datajs["data"];
+          var rows = table_from_data(projects);
           var table_body = document.getElementById("table-body");
           table_body.innerHTML = rows;
         }

@@ -38,27 +38,8 @@
         <!-- Topbar -->
         <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
-          <!-- Sidebar Toggle (Topbar) -->
-          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-            <i class="fa fa-bars"></i>
-          </button>
-
           <!-- Topbar Navbar -->
           <ul class="navbar-nav ml-auto">
-            <li class="nav-item dropdown no-arrow">
-              <a class="nav-link dropdown-toggle" href="#" id="actionDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Actions</span>
-              </a>
-              <!-- Dropdown - User Information -->
-              <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                <span class="dropdown-item" onclick="window.location.href='edit_permission.html'">
-                  Edit Permissions
-                </span>
-                <div id="approve-section">
-                </div>
-              </div>
-            </li>
-
             <div class="topbar-divider d-none d-sm-block"></div>
 
             <!-- Nav Item - User Information -->
@@ -90,29 +71,30 @@
         <div class="container-fluid">
 
           <!-- Page Heading -->
-          <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Edit User</h1>
+          <h1 class="h3 mb-2 text-gray-800">Downloads</h1>
+
+          <!-- DataTales Example -->
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <div class="btn btn-primary">
+                  All Downloads
+                </div>
+                
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-body"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
-          <form id="mainform" onsubmit="return false" class="user">
-            <div class="form-group">
-                <input type="text" class="form-control form-control-user" id="name" placeholder="Name">
-            </div>
-            <div class="form-group">
-                <input type="text" class="form-control form-control-user" id="username" placeholder="Username">
-            </div>
-            <div class="form-group">
-                <input type="email" class="form-control form-control-user" id="email" placeholder="Email Address">
-            </div>
-            <div class="form-group row">
-                <div class="col-sm-6 mb-3 mb-sm-0">
-                <input type="password" class="form-control form-control-user" id="password" placeholder="Password">
-                </div>
-                <div class="col-sm-6">
-                <input type="password" class="form-control form-control-user" id="repassword" placeholder="Repeat Password">
-                </div>
-            </div>
-            <button type="button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Save</button>
-            </form>
+
         </div>
         <!-- /.container-fluid -->
 
@@ -181,100 +163,115 @@
     document.getElementById("main-title").innerText = name;
     document.getElementById("sidebar-name").innerText = name;
 
-    var get_form_data = function(){
-        var mainform = document.getElementById("mainform");
-        var name=mainform.name.value;
-        var username=mainform.username.value;
-        var email=mainform.email.value;
-        var password=mainform.password.value;
-        var repassword=mainform.repassword.value;
-        return [name,username,email,password,repassword];
+    var get_data = function(){
+        return [0,20];
     }
 
-    function validate_form(){
-        formdata = get_form_data();
-        var name=formdata[0];
-        var username=formdata[1];
-        var email=formdata[2];
-        var password=formdata[3];
-        var repassword=formdata[4];
+    function validate_data(){
+        var qdata = get_data();
+        var start=qdata[0];
+        var limit=qdata[1];
 
         var msg = null;
-        if(!validate_string(name)){
-            msg = "Name not set correctly";
-        }else if(!validate_string(username) || username.indexOf(" ")>0){
-            msg = "Username not set correctly, ensure no spaces";
-        }else if(!validate_string(email)){
-            msg = "Email not set correctly";
-        }else if(!validate_string(password)){
-            msg = "Password not set correctly";
-        }else if(!validate_string(repassword)){
-            msg = "Re-entered password not set correctly";
-        }else if(password !== repassword){
-            msg = "Passwords don't match";
+        if(start<0){
+            msg = "Start Value not set correctly";
+        }else if(limit<0){
+            msg = "Limit not set correctly";
         }
         return msg;
     }
 
-    async function send_data(){
-        var msg = validate_form();
+    function table_from_data(data){
+      var content="";
+      for(var i=0; i<data.length; i++){
+        var obj = data[i];
+        var row = "<tr><td>"+obj["name"]+"</td>";
+        row += "<td>"+obj["description"]+"</td>";
+        row += "<td>"+obj["start"]+"</td>";
+        row += "<td>"+obj["total"]+"</td>";
+        row += "<td>"+obj["created_on"]+"</td>";
+        row += "<td>"+obj["state"]+"</td>";
+        // menu
+        row += `<td>
+          <div class="menu-nav">
+            <div class="dropdown-container" tabindex="-1">
+              <div class="three-dots"></div>
+              <div class="dropdown">
+                <div id='`+id_core+`' onclick="prepare_and_load_config_view(this)" class="mr-2 ml-2 text-gray-400">
+                  <span>View</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </td>`;
+        row += "</tr>";
+        
+        content += row;
+      }
+      return content;
+    }
+
+    async function request_data_by_category(category){
+        var msg = validate_data();
         if (msg!==null){
             alert(msg);
             return;
         }
 
-        formdata = get_form_data();
-        var name=formdata[0];
-        var username=formdata[1];
-        var email=formdata[2];
-        var password=formdata[3];
+        var qdata = get_data();
+        var start=qdata[1];
+        var limit=qdata[2];
 
-        var jsondata = {
-            "name":name,
-            "username":username,
-            "email":email,
-            "password":password,
-            "created_by":"superuser"
-        }
-
-        /*var res = await api_post("/user/add", jsondata);
+        console.log("MAKING PROJECT");
+        var res = await api_get("/projects/"+category);
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
-            alert(datajs["message"]);
+          alert(datajs["message"]);
         }else{
-            alert(datajs["data"]);
-            // go to some page
-        }*/
-    }
-
-    async function fill_from_data(){
-      var username = window.localStorage.getItem("user-name");
-      if (validate_string(username)){
-        var res = await api_get("/users/get/"+username);
-        var datajs = await res.json();
-        console.log(datajs);
-
-        if (datajs["status"]==="success"){
-          data = datajs["data"];
-          mainform.name.value=data["name"];
-          mainform.email.value=data["email"];
-          mainform.username.value=data["username"];
-
-          let approved = data["approved"];
-          if (!Boolean(approved)){
-            var ahtml = `
-              <div class="dropdown-divider"></div>
-              <span class="dropdown-item" onclick="">
-                Approve Account
-              </span>`;
-            document.getElementById("approve-section").innerHTML=ahtml;
-          }
-
+          var projects = datajs["data"];
+          var rows = table_from_data(projects);
+          var table_body = document.getElementById("table-body");
+          table_body.innerHTML = rows;
         }
       }
+
+    //fill table
+    function on_click_category_item(category_text){
+      var spl = category_text.split(" ");
+      var category = spl[0].toUpperCase();
+      console.log("Category :", category);
+      request_data_by_category(category);
+
     }
-    fill_from_data();
+    $('.dropdown-item').on('click', 
+    function(){
+      $('#dropdownMenuButton').text($(this).text());
+      on_click_category_item($(this).text());
+    })
+
+    // search functionality
+    async function request_data_by_search_text(){
+      var search_bar = document.getElementById("search-bar");
+      var text = search_bar.value;
+      console.log("TEXT:", text);
+      if (!validate_string(text)){
+        request_data_by_category("ALL");
+        return;
+      }
+      
+      var res = await api_get("/projects/search/"+text);
+      var datajs = await res.json();
+      console.log("DATAJS :", datajs);
+      if (datajs["status"]!=="success"){
+        alert(datajs["message"]);
+      }else{
+        var projects = datajs["data"];
+        var rows = table_from_data(projects);
+        var table_body = document.getElementById("table-body");
+        table_body.innerHTML = rows;
+      }
+    }
     
   </script>
 
