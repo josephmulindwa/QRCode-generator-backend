@@ -185,25 +185,8 @@
       var content="";
       for(var i=0; i<data.length; i++){
         var obj = data[i];
-        var row = "<tr><td>"+obj["name"]+"</td>";
-        row += "<td>"+obj["description"]+"</td>";
-        row += "<td>"+obj["start"]+"</td>";
-        row += "<td>"+obj["total"]+"</td>";
-        row += "<td>"+obj["created_on"]+"</td>";
-        row += "<td>"+obj["state"]+"</td>";
-        // menu
-        row += `<td>
-          <div class="menu-nav">
-            <div class="dropdown-container" tabindex="-1">
-              <div class="three-dots"></div>
-              <div class="dropdown">
-                <div id='`+id_core+`' onclick="prepare_and_load_config_view(this)" class="mr-2 ml-2 text-gray-400">
-                  <span>View</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </td>`;
+        var row = "<tr><td>"+obj[0]+"</td>";
+        row += "<td>"+obj[1]+"</td>";
         row += "</tr>";
         
         content += row;
@@ -211,67 +194,28 @@
       return content;
     }
 
-    async function request_data_by_category(category){
+    async function request_downloads(){
         var msg = validate_data();
         if (msg!==null){
             alert(msg);
             return;
         }
-
-        var qdata = get_data();
-        var start=qdata[1];
-        var limit=qdata[2];
-
-        console.log("MAKING PROJECT");
-        var res = await api_get("/projects/"+category);
+        let projectname = window.localStorage.getItem("project-name");
+        var res = await api_get("/downloads/"+projectname);
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
           alert(datajs["message"]);
         }else{
-          var projects = datajs["data"];
-          var rows = table_from_data(projects);
+          var downloads = datajs["data"];
+          var rows = table_from_data(downloads);
           var table_body = document.getElementById("table-body");
           table_body.innerHTML = rows;
         }
       }
+    request_downloads();
 
-    //fill table
-    function on_click_category_item(category_text){
-      var spl = category_text.split(" ");
-      var category = spl[0].toUpperCase();
-      console.log("Category :", category);
-      request_data_by_category(category);
-
-    }
-    $('.dropdown-item').on('click', 
-    function(){
-      $('#dropdownMenuButton').text($(this).text());
-      on_click_category_item($(this).text());
-    })
-
-    // search functionality
-    async function request_data_by_search_text(){
-      var search_bar = document.getElementById("search-bar");
-      var text = search_bar.value;
-      console.log("TEXT:", text);
-      if (!validate_string(text)){
-        request_data_by_category("ALL");
-        return;
-      }
-      
-      var res = await api_get("/projects/search/"+text);
-      var datajs = await res.json();
-      console.log("DATAJS :", datajs);
-      if (datajs["status"]!=="success"){
-        alert(datajs["message"]);
-      }else{
-        var projects = datajs["data"];
-        var rows = table_from_data(projects);
-        var table_body = document.getElementById("table-body");
-        table_body.innerHTML = rows;
-      }
-    }
+   
     
   </script>
 

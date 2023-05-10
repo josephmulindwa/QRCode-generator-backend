@@ -191,10 +191,12 @@
 
     async function fill_from_data(){
       var username = window.localStorage.getItem("user-name");
-      console.log("username :"+username);
+      console.log("--username :"+username);
       if (validate_string(username)){
         let permission_get_response = await api_get("/permissions");
         var datajs = await permission_get_response.json();
+
+        console.log("DATAJS :", datajs);
 
         if (datajs["status"]==="success"){
           var all_permissions = datajs["data"];

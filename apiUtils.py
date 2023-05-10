@@ -1,5 +1,4 @@
 import os
-import subprocess
 import shutil
 import zipfile
 import threading
@@ -124,8 +123,6 @@ class QRCodeGenerator:
         self.targetfolder=os.path.join(ROOT, OUTPUT_FOLDER)
         if folder is not None:
             self.targetfolder=os.path.join(self.targetfolder, folder)
-        if self.name is not None:
-            self.targetfolder=os.path.join(self.targetfolder, name)
 
         if os.path.exists(self.targetfolder):
             shutil.rmtree(self.targetfolder)
@@ -145,11 +142,9 @@ class QRCodeGenerator:
         """
         csv_data = ""
         try:
-            if not os.path.exists(outfolder):
-                os.makedirs(outfolder)
-            else:
-                # remove amd remake folder
-                pass
+            if os.path.exists(outfolder):
+                shutil.rmtree(outfolder)
+            os.makedirs(outfolder)
             csv_path = os.path.join(outfolder, CSV_FILE)
             with open(csv_path, 'w') as fw:
                 fw.write("Serials,Filename\n")
@@ -239,7 +234,7 @@ class QRCodeGenerator:
     def is_complete(self):
         return self.total==self.progress  # and zipping is done
 
-def get_generator_from_configuration(name, config):
+def get_generator_from_configuration(name, config, foldername):
     # generates a generator object that conforms to the config  
     _version = config.version
     _error_correction = config.get_error_correction()
@@ -248,6 +243,7 @@ def get_generator_from_configuration(name, config):
     _folder_batch=config.folder_batch
     _fg_color = config.get_fore_color()
     _bg_color = config.get_back_color()
+    print("FORE :", _fg_color, _bg_color)
 
     generator = QRCodeGenerator(
         name=name, 
@@ -256,9 +252,8 @@ def get_generator_from_configuration(name, config):
         box_size=_box_size, 
         border=_border,
         folder_batch=_folder_batch,
-        fgcolor=utils.hex_to_rgb(_fg_color),
-        bgcolor=utils.hex_to_rgb(_bg_color)
+        fgcolor=_fg_color,
+        bgcolor=_bg_color,
+        folder=foldername
         )
     return generator
-
-## user database

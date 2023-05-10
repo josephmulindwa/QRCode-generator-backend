@@ -51,60 +51,61 @@ def generate_jwt(headers, payload):
 
 def decompose_jwt(jwt):
     # returns payload in $jwt, doesn't verify
-    tokenParts = jwt.split('.')
-    header = b64d(tokenParts[0])
-    payload = b64d(tokenParts[1])
-    signature_provided = tokenParts[2]
-    payload_json = json.loads(payload)
-    return payload_json
+    token_parts = jwt.split('.')
+    if len(token_parts) != 3:
+        return None
+    header_part, payload_part, signature_part = token_parts
+    try:
+        header = b64d(header_part)
+        payload = b64d(payload_part+"==")
+        signature_provided = signature_part
+        headers_json = json.loads(header)
+        payload_json = json.loads(payload)
+        return headers_json, payload_json, signature_provided
+    except Exception as e:
+        print(e)
+        return None
+
 
 def is_jwt_valid(jwt):
     # split the jwt
     if jwt is None or len(jwt)==0:
         return False
-    secret = get_secret_key()
-    tokenParts = jwt.split('.')
-    if len(tokenParts)!=3:
+    decompose = decompose_jwt(jwt)
+    if decompose is None:
         return False
-    header = b64d(tokenParts[0])
-    payload = b64d(tokenParts[1])
-    signature_provided = tokenParts[2]
+    headers, payload, signature_provided = decompose
     
     # check the expiration time - note this will cause an error if there is no 'exp' claim in the jwt
-    payload_json = payload
-    if not "exp" in payload_json:
+    if not "exp" in payload:
         return False
-    expiration = payload[exp]
+    expiration = payload["exp"]
     is_token_expired = (expiration - time.time()) <= 0
     
     #build a signature based on the header and payload using the secret
-    base64_url_header = base64url_encode(header)
-    base64_url_payload = base64url_encode(payload)
-    data = "{}.{}".format(base64_url_header, base64_url_payload)
-    signature = hmac.new(bytes(secret, 'UTF-8'), data.encode(), hashlib.sha256).hexdigest()
-    base64_url_signature = base64url_encode(signature)
+
+    test_jwt = generate_jwt(headers, payload)
+    test_jwt_parts = test_jwt.split(".")
+    test_jwt_signature = test_jwt_parts[2]
     
     # verify it matches the signature provided in the jwt
-    is_signature_valid = (base64_url_signature==signature_provided)
+    is_signature_valid = (test_jwt_signature==signature_provided)
         
     if is_token_expired or not is_signature_valid:
         return False
     else:
         return True
 
-def detokenize_from_request(headers, bypass=False):
+def detokenize_from_request(request, bypass=False):
     """
-    checks if token came with request and returns contents of token payload
-    @params : bypass => set up token-data to handle as if user requested
     """
-    if "Authorization" in headers:
-        auth = headers["Authorization"]
-        auth_data = auth.split(" ")
-        token = auth_data[1]
-        if not is_jwt_valid(token):
-            return None
-        return decompose_jwt(token)
-    else:
-        if bypass:
-            return {"username":"guest"}
-        return None
+    if bypass:
+        pass
+    auth_data = request.headers.get("authorization")
+    if auth_data is not None and (auth_data.startswith("bearer") or auth_data.startswith("Bearer")):
+        spl = auth_data.split(" ")
+        if len(spl)==2:
+            token = spl[1]
+            if not is_jwt_valid(token):
+                return None
+            return decompose_jwt(token)

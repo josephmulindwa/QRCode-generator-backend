@@ -101,7 +101,7 @@
           <div class="row">
 
             <!-- Users Card Example -->
-            <div class="col-xl-3 col-md-6 mb-4">
+            <div class="col-xl-3 col-md-6 mb-4" id="user-count-card">
               <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
@@ -157,7 +157,7 @@
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Projects</div>
+                      <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Projects (Pending)</div>
                       <div class="h5 mb-0 font-weight-bold text-gray-800" id="project-count-active">0</div>
                     </div>
                     <div class="col-auto">
@@ -229,12 +229,19 @@
   <script src="js/utils.js"></script>
 
   <script>
-    var name = "SUPER ADMIN"; // get_current_name();
+    var name = get_active_name();
     console.log("name :", name);
 
     // FILLING PAGE
     document.getElementById("main-title").innerText = name;
     document.getElementById("sidebar-name").innerText = name;
+
+    function fill_from_permissions(){
+      get_user_permissions();
+      var permissions = window.localStorage.getItem("permissions").split(",");
+      document.getElementById("user-count-card").style.display = permissions.includes("VIEW_USERS") ? "initial":"none";
+    }
+    fill_from_permissions();
 
     async function super_fetch_and_set_user_count(){
       let response = await api_get("/users/count");
@@ -242,12 +249,14 @@
       var count=0;
       if (datajs["status"]=="success"){
         count = datajs["data"]
+      }else{
+        window.location.href="login.html";
       }
       document.getElementById("user-count").innerText=count;
     }
 
     async function super_fetch_and_set_request_count(category, target_id){
-      let response = await api_get("/projects/count_all/"+category);
+      let response = await api_get("/projects/count/"+category);
       var datajs = await response.json();
       var count=0;
       if (datajs["status"]=="success"){

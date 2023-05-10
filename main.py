@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, Request
 from pydantic import BaseModel
 from fastapi.responses import Response, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -84,20 +84,29 @@ def get_data_from_file(file_path: str) -> Generator:
     with open(file=file_path, mode="rb") as file_like:
         yield file_like.read()
 
+def get_user_from_request(req : Request):
+    decompose = authenticate.detokenize_from_request(req)
+    if decompose is None:
+        return None
+    _, payload, __ = decompose
+    if "username" in payload.keys():
+        return User.fromUsername(payload['username'])
+    return None
+
 @api_app.post('/generate')
-async def generate_codes(req : ProjectForm):
-    name=utils.clean_string(req.name)
-    start_value=req.start_value
-    total=req.count
-    description=req.description
-    qr_serial_length=req.qr_serial_length
-    csv_serial_length=req.csv_serial_length
-    pre_string=req.pre_string
-    pro_string=req.pro_string
-    config_name=req.config_name
+async def generate_codes(form : ProjectForm, req:Request):
+    name=utils.clean_string(form.name)
+    start_value=form.start_value
+    total=form.count
+    description=form.description
+    qr_serial_length=form.qr_serial_length
+    csv_serial_length=form.csv_serial_length
+    pre_string=form.pre_string
+    pro_string=form.pro_string
+    config_name=form.config_name
 
     # decompose from token
-    user = User.fromUsername(User.superadmin['username'])
+    user = get_user_from_request(req)
     if user is None:
         response = {"status":"failed", "message":"Project failed - no user!"}
     else:
@@ -113,7 +122,7 @@ async def generate_codes(req : ProjectForm):
                     config.id,progress=0,created_on=None,state=Project.STATE_ACTIVE)
                 key = get_user_project_key(user.username, projectname=name)
                 try:
-                    qrgen = apiutils.get_generator_from_configuration(key, config)
+                    qrgen = apiutils.get_generator_from_configuration(key, config, os.path.join(user.username, name))
                     apiutils.add_qrgen_object(key, qrgen)
                     generate_fn = lambda : qrgen.generate(start_number=start_value, limit=total, qr_serial_length=qr_serial_length, 
                         csv_serial_length=csv_serial_length, pre_string=pre_string, pro_string=pro_string)
@@ -129,9 +138,9 @@ async def generate_codes(req : ProjectForm):
     return response
 
 @app.get('/progress/{projectname}')
-async def get_progress(projectname : str):
+async def get_progress(projectname : str, req:Request):
     # returns the progress of a specific user
-    user = User.fromUsername(User.superadmin['username'])
+    user = get_user_from_request(req)
     if user is None:
         return "Failed"
     key = get_user_project_key(user.username, projectname)
@@ -149,9 +158,9 @@ async def get_progress(projectname : str):
     return response
         
 @api_app.post('/login')
-async def login(req : LoginForm):
-    identifier = req.identifier
-    password = req.password
+async def login(form : LoginForm):
+    identifier = form.identifier
+    password = form.password
     user = User.fromUsername(identifier)
     response = {"status":"failed", "message":"username or password is invalid"}
     if user is not None:
@@ -168,12 +177,12 @@ async def login(req : LoginForm):
     return response
 
 @api_app.get('/projects/{category}')
-async def get_projects_by_category(category:str):
+async def get_projects_by_category(category:str, req:Request):
     categories = ["ALL", "BILLED", "ACTIVE", "COMPLETE", "INACTIVE"]
     if category not in categories:
         response = {"status":"failed", "message":"Unkown category `{}`".format(category)}
     else:
-        user = User.fromUsername(User.superadmin['username'])
+        user = get_user_from_request(req)
         if user is None:
             response = {"status":"failed", "message":"No such user"}
         else:
@@ -185,22 +194,24 @@ async def get_projects_by_category(category:str):
             response = {"status":"success", "data":projects}
     return response
 
-@app.get('/downloads/{user}/{projectname}')
-async def get_downloads(user : str, projectname : str):
+@api_app.get('/downloads/{projectname}')
+async def get_downloads(projectname : str, req:Request):
     # returns a list to currently available zip files
-    username = utils.get_hash(user)
-    user_obj = User.fromUsername(username)
+    user = get_user_from_request(req)
     response = {"status":"failed", "message":"An error occured!"}
-    if user_obj is None:
-        response = {"status":"failed", "message":"User does not exist!"}
+    if user is None:
+        response = {"status":"failed", "message":"Invalid Token!"}
     else:
-        userfolder = os.path.join(apiutils.ROOT, apiutils.APP_FOLDER, username, projectname)
-        files = os.listdir(userfolder)
-        downloadables = [(file, "{}/{}".format(username,file)) for file in files if len(re.findall('^\d+_\d+\.zip$', file))>0] 
-        response = {"status":"success", "data":downloadables}
+        targetfolder = os.path.join(apiutils.ROOT, apiutils.APP_FOLDER, user.username, projectname)
+        if os.path.exists(targetfolder):
+            files = os.listdir(targetfolder)
+            downloadables = [(file, "{}/{}".format(user.username,file)) for file in files if len(re.findall('^\d+_\d+\.zip$', file))>0] 
+            response = {"status":"success", "data":downloadables}
+        else:
+            response = {"status":"failed", "message":"Not Found!"}
     return response
 
-@app.get('/download/{user}/{file}')
+@api_app.get('/download/{user}/{file}')
 async def download(user : str, file:str):
     try:
         username = utils.get_hash(user)
@@ -223,7 +234,7 @@ async def download(user : str, file:str):
         return status.HTTP_404_NOT_FOUND
 
 
-@app.get('/cancel/{user}')
+@api_app.get('/cancel/{user}')
 async def cancel_generation(user : str):
     '''cancels tasks being handled by this user'''
     username = utils.get_hash(user)
@@ -236,33 +247,27 @@ async def cancel_generation(user : str):
     return "Task cancelled by user!"
 
 @api_app.post("/user/add")
-async def add_user(req : UserForm):
-    name=req.name
-    username=req.username
-    email=req.email
-    password=req.password
-    created_by=req.created_by
+async def add_user(form : UserForm, req:Request):
+    name=form.name
+    username=form.username
+    email=form.email
+    password=form.password
 
-    user = None
-    if created_by is None or len(created_by)==0:
-        created_by=None
-    else:
-        user = User.fromUsername(username)
-        if user is not None:
-            created_by = user.id
+    user = get_user_from_request(req)
     if user is None:
-        user = User()
-    exist_user = user.get_user(username)
-    if exist_user is None:
-        user.add_user(name, username, email, password, approved=(created_by is not None))
-        response = {"status":"success", "data":"user added"}
+        response = {"status":"failed", "message":"Invalid token!"}
     else:
-        response = {"status":"failed", "message":"user already exists!"}
+        exist_user = user.get_user(username)
+        if exist_user is None:
+            user.add_user(name, username, email, password, approved=True)
+            response = {"status":"success", "data":"user added"}
+        else:
+            response = {"status":"failed", "message":"user already exists!"}
     return response
 
 @api_app.get('/users/list')
-async def get_downloads():
-    user = User.fromUsername(User.superadmin['username'])
+async def get_downloads(req : Request):
+    user = get_user_from_request(req)
     if user is None:
         response = {"status":"failed", "message":"No such user"}
     else:
@@ -271,15 +276,15 @@ async def get_downloads():
     return response
 
 @api_app.post("/configurations/add")
-async def add_configuration(req : ConfigurationForm):
-    name=utils.clean_string(req.name)
-    version=req.version
-    folder_batch=req.folder_batch
-    error_correction=req.error_correction
-    box_size=req.box_size
-    border=req.border
-    fore_color=req.fore_color
-    back_color=req.back_color
+async def add_configuration(form : ConfigurationForm, req:Request):
+    name=utils.clean_string(form.name)
+    version=form.version
+    folder_batch=form.folder_batch
+    error_correction=form.error_correction
+    box_size=form.box_size
+    border=form.border
+    fore_color=form.fore_color
+    back_color=form.back_color
 
     # validate input
     error=False
@@ -291,7 +296,7 @@ async def add_configuration(req : ConfigurationForm):
     if error:
         response = {"status":"failed", "message":"invalid input"}
     else:
-        user = User.fromUsername(User.superadmin['username'])
+        user = get_user_from_request(req)
         if user is None:
             response = {"status":"failed", "message":"No such user"}
         else:
@@ -304,8 +309,8 @@ async def add_configuration(req : ConfigurationForm):
     return response
 
 @api_app.get("/configurations/list")
-async def get_configurations():
-    user = User.fromUsername(User.superadmin['username'])
+async def get_configurations(req : Request):
+    user = get_user_from_request(req)
     if user is None:
         response = {"status":"failed", "message":"No such user"}
     else:
@@ -315,8 +320,8 @@ async def get_configurations():
     return response
 
 @api_app.get("/users/count")
-async def get_user_count():
-    user = User.fromUsername(User.superadmin['username'])
+async def get_user_count(req : Request):
+    user = get_user_from_request(req)
     if user is None:
         response = {"status":"failed", "message":"No such user"}
     else:
@@ -327,8 +332,8 @@ async def get_user_count():
     return response
 
 @api_app.get("/users/search/{text}")
-async def search_users_by_text(text : str):
-    user = User.fromUsername(User.superadmin['username'])
+async def search_users_by_text(text : str, req:Request):
+    user = get_user_from_request(req)
     if user is None:
         response = {"status":"failed", "message":"No such user"}
     else:
@@ -352,8 +357,8 @@ async def search_users_by_text(text : str):
     return response
 
 @api_app.get("/projects/search/{text}")
-async def search_projects_by_text(text : str):
-    user = User.fromUsername(User.superadmin['username'])
+async def search_projects_by_text(text : str, req:Request):
+    user = get_user_from_request(req)
     if user is None:
         response = {"status":"failed", "message":"No such user"}
     else:
@@ -365,8 +370,8 @@ async def search_projects_by_text(text : str):
     return response
 
 @api_app.get("/projects/get/{name}")
-async def search_projects_by_text(name : str):
-    user = User.fromUsername(User.superadmin['username'])
+async def search_projects_by_text(name : str, req:Request):
+    user = get_user_from_request(req)
     if user is None:
         response = {"status":"failed", "message":"No such user"}
     else:
@@ -378,8 +383,8 @@ async def search_projects_by_text(name : str):
     return response
 
 @api_app.get("/configurations/search/{text}")
-async def search_projects_by_text(text : str):
-    user = User.fromUsername(User.superadmin['username'])
+async def search_projects_by_text(text : str, req:Request):
+    user = get_user_from_request(req)
     if user is None:
         response = {"status":"failed", "message":"No such user"}
     else:
@@ -389,13 +394,16 @@ async def search_projects_by_text(text : str):
             response = {"status":"failed", "message":"An error occured on our end"}
     return response
 
-@api_app.get("/projects/count_all/{category}")
-async def get_user_count(category : str):
-    user = User.fromUsername(User.superadmin['username'])
+@api_app.get("/projects/count/{category}")
+async def get_user_count(category : str, req:Request):
+    """
+    returns counts for this category for this user
+    """
+    user = get_user_from_request(req)
     if user is None:
         response = {"status":"failed", "message":"No such user"}
     else:
-        count = user.count_all_projects(category=category)
+        count = user.count_projects(category=category)
         response = {"status":"success", "data":count}
         if count is None:
             response = {"status":"failed", "message":"Unkown category `{}`".format(category)}
@@ -407,17 +415,17 @@ async def get_error_corrections():
     return response
 
 @api_app.post("/preview/image")
-async def get_preview_image(req : ProjectForm):
-    start_value=req.start_value
-    total=req.count
-    qr_serial_length=req.qr_serial_length
-    pre_string=req.pre_string
-    pro_string=req.pro_string
-    config_name=req.config_name
+async def get_preview_image(form : ProjectForm, req:Request):
+    start_value=form.start_value
+    total=form.count
+    qr_serial_length=form.qr_serial_length
+    pre_string=form.pre_string
+    pro_string=form.pro_string
+    config_name=form.config_name
 
     # decompose from token
     response = status.HTTP_404_NOT_FOUND
-    user = User.fromUsername(User.superadmin['username'])
+    user = get_user_from_request(req)
     if user is not None:
         config = user.get_configuration_by_name(config_name)
         if config is not None:
@@ -445,27 +453,27 @@ async def get_preview_image(req : ProjectForm):
 
 
 @api_app.post('/preview/text')
-async def get_preview_text(req : ProjectForm):
+async def get_preview_text(form : ProjectForm):
     '''returns sample string depending on stats'''
-    start_value=req.start_value
-    total=req.count
-    qr_serial_length=req.qr_serial_length
-    pre_string=req.pre_string
-    pro_string=req.pro_string
+    start_value=form.start_value
+    total=form.count
+    qr_serial_length=form.qr_serial_length
+    pre_string=form.pre_string
+    pro_string=form.pro_string
 
     first_string, last_string = apiutils.get_text_samples(start_value, total, qr_serial_length, pre_string, pro_string)
     return {"status":"success", "data":{"start":first_string, "end":last_string}}
 
 @api_app.post("/config/preview")
-async def get_config_preview(req : ConfigurationForm):
-    name=utils.clean_string(req.name)
-    version=req.version
-    folder_batch=req.folder_batch
-    error_correction=req.error_correction
-    box_size=req.box_size
-    border=req.border
-    fore_color=req.fore_color
-    back_color=req.back_color
+async def get_config_preview(form : ConfigurationForm):
+    name=utils.clean_string(form.name)
+    version=form.version
+    folder_batch=form.folder_batch
+    error_correction=form.error_correction
+    box_size=form.box_size
+    border=form.border
+    fore_color=form.fore_color
+    back_color=form.back_color
 
     # validate input
     error=False
@@ -497,18 +505,18 @@ async def get_config_preview(req : ConfigurationForm):
     return response
 
 @api_app.get("/configurations/get/{name}")
-def get_configuration(name : str):
+def get_configuration(name : str, req:Request):
     response = {"status":"failed", "message":"Failed to fetch!"}
     user = User.fromUsername(User.superadmin['username'])
     if user is not None:
-        config = user.get_configuration_by_name(name)
+        config = get_user_from_request(req)
         if config is not None:
             response = {"status":"success", "data":config.as_dict()}
     return response
 
 @api_app.get("/users/get/{username}")
-def get_user_profile(username : str):
-    user = User.fromUsername(User.superadmin['username'])
+def get_user_profile(username : str, req:Request):
+    user = get_user_from_request(req)
     response = {"status":"failed", "message":"Invalid token!"}
     if user is not None:
         requested_user = user.get_user(username)
@@ -522,8 +530,11 @@ def get_user_profile(username : str):
     return response
 
 @api_app.get("/user/permissions/{username}")
-def get_user_permissions(username : str):
-    user = User.fromUsername(User.superadmin['username'])
+def get_user_permissions(username : str, req:Request):
+    """
+    returns the list of permissions for username
+    """
+    user = get_user_from_request(req)
     response = {"status":"failed", "message":"Invalid token!"}
     if user is not None:
         target_user = User.fromUsername(username)
@@ -539,8 +550,8 @@ def get_user_permissions(username : str):
     return response
 
 @api_app.get("/permissions") # return self-permissions
-def get_user_permissions():
-    user = User.fromUsername(User.superadmin['username'])
+def get_user_permissions(req : Request):
+    user = get_user_from_request(req)
     response = {"status":"failed", "message":"Invalid token!"}
     if user is not None:
         permissions = user.get_permissions_for_user(user.id)
@@ -557,12 +568,12 @@ def get_all_permissions():
     return {"status":"success", "data":data}
 
 @api_app.post("/permissions/set")
-def set_permissions(req : PermissionListForm):
-    username = req.username
-    permissions = req.listing
+def set_permissions(form : PermissionListForm, req : Request):
+    username = form.username
+    permissions = form.listing
     permission_ids = UserPermission.get_ids_from_codes(permissions)
 
-    user = User.fromUsername(User.superadmin['username'])
+    user = get_user_from_request(req)
     response = {"status":"failed", "message":"Invalid token!"}
     if user is not None:
         exist_user = User.fromUsername(username)

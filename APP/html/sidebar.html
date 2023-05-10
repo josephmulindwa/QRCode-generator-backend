@@ -26,7 +26,7 @@
   </div>
 
   <!-- Nav Item - Pages Collapse Menu -->
-  <li class="nav-item">
+  <li class="nav-item" id="new-project-section">
     <a class="nav-link" href="new_project.html" aria-expanded="true">
       <i class="fas fa-fw fa-plus-square"></i>
       <span>New Project</span>
@@ -34,7 +34,7 @@
   </li>
 
   <!-- Nav Item - Utilities Collapse Menu -->
-  <li class="nav-item">
+  <li class="nav-item" id="view-m-projects-section">
     <a class="nav-link" href="my_projects.html" aria-expanded="true">
       <i class="fas fa-fw fa-clone"></i>
       <span>My Projects</span>
@@ -42,7 +42,7 @@
   </li>
 
   <!-- Nav Item - Utilities Collapse Menu -->
-  <li class="nav-item">
+  <li class="nav-item" id="view-u-projects-section">
     <a class="nav-link" href="projects.html" aria-expanded="true">
       <i class="fas fa-fw fa-clone"></i>
       <span>User Projects</span>
@@ -53,12 +53,12 @@
   <hr class="sidebar-divider">
 
   <!-- Heading -->
-  <div class="sidebar-heading">
+  <div class="sidebar-heading" id="users-section">
     Users
   </div>
 
   <!-- Nav Item  -->
-  <li class="nav-item">
+  <li class="nav-item" id="new-user-section">
     <a class="nav-link" href="new_user.html" aria-expanded="true">
       <i class="fas fa-fw fa-user"></i>
       <span>New User</span>
@@ -66,7 +66,7 @@
   </li>
 
   <!-- Nav Item -->
-  <li class="nav-item">
+  <li class="nav-item" id="view-users-section">
     <a class="nav-link" href="users.html" aria-expanded="true">
       <i class="fas fa-fw fa-users"></i>
       <span>Users</span>
@@ -79,16 +79,35 @@
   </div>
 
   <!-- Nav Item -->
-  <li class="nav-item">
+  <li class="nav-item" id="new-config-section">
     <a class="nav-link" href="new_configuration.html" aria-expanded="true">
       <i class="fas fa-fw fa-wrench"></i>
       <span>New Configuration</span>
     </a>
   </li>
 
-  <li class="nav-item">
+  <li class="nav-item" id="view-configs-section">
     <a class="nav-link" href="configurations.html" aria-expanded="true">
       <i class="fas fa-fw fa-cubes"></i>
       <span>Configurations</span>
     </a>
   </li>
+
+  <script src="js/utils.js"></script>
+  <script>
+    
+    function fill_from_permissions(){
+      get_user_permissions();
+      var permissions = window.localStorage.getItem("permissions").split(",");
+      console.log("@PERM :", permissions);
+
+      // new project section
+      document.getElementById("new-project-section").style.display = permissions.includes("CREATE_PROJECTS") ? "initial":"none";
+      document.getElementById("view-m-projects-section").style.display = permissions.includes("VIEW_M_PROJECTS") ? "initial":"none";
+      document.getElementById("view-u-projects-section").style.display = permissions.includes("VIEW_U_PROJECTS") ? "initial":"none";
+      document.getElementById("users-section").style.display = (permissions.includes("CREATE_USERS") || permissions.includes("VIEW_USERS")) ? "initial":"none";
+      document.getElementById("new-user-section").style.display = permissions.includes("CREATE_USERS") ? "initial":"none";
+      document.getElementById("view-users-section").style.display = permissions.includes("VIEW_USERS") ? "initial":"none";
+    }
+    fill_from_permissions();
+  </script>

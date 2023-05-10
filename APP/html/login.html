@@ -120,10 +120,10 @@
       if (datajs["status"]==="success"){
         var data = datajs["data"];
         window.localStorage.setItem("token", data['token']);
+        window.localStorage.setItem("username", data["username"]);
+        window.localStorage.setItem("name", data["name"]);
 
-        
-
-        //window.location.href = "index.html";
+        window.location.href = "index.html";
       }else{
         alert(datajs["message"]);
       }

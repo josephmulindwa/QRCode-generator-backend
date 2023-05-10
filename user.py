@@ -218,6 +218,7 @@ class User:
         return Project.count_projects(user_id=None, category=category)
 
     def count_projects(self, category="ALL"):
+        # counts projects for this user_id that have state=category
         return Project.count_projects(user_id=self.id, category=category)
     
     def get_permissions(self):

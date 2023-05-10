@@ -34,11 +34,14 @@ async function api_post(url, jsondata){
     // posts and returns raw response
     var base_url = detect_access_uri()+"/api";
     var url=base_url+url;
+    let token = window.localStorage.getItem("token");
 
     try{
         let response = fetch(url, 
-            {method:'POST', body:JSON.stringify(jsondata),
-            headers: { "Content-type": "application/json; charset=UTF-8" }}
+            {
+                method:'POST', body:JSON.stringify(jsondata),
+                headers: { "Content-type": "application/json; charset=UTF-8", "Authorization":"bearer "+token}
+            }
             );
         let res = await response;
         return res;
@@ -51,18 +54,45 @@ async function api_get(url){
     var base_url = detect_access_uri()+"/api";
     var url=base_url+url;
     console.log("GET :", url);
+    let token = window.localStorage.getItem("token");
 
     try{
-        return fetch(url, {method:'GET'});
+        return fetch(url, {
+            method:'GET',
+            headers:{"Authorization":"bearer "+token}
+        });
     }catch(err){
         console.log(err);
     }
 }
 
 function get_active_username(){
-    return "superadmin";
+    let username = window.localStorage.getItem("username");
+    console.log("@active_username :", username);
+    if (!validate_string(username)){
+        return "";
+    }
+    return username;
 }
 
 function get_active_name(){
-    return "SUPER ADMIN";
+    let name = window.localStorage.getItem("name");
+    if (!validate_string(name)){
+        return "";
+    }
+    return name;
+}
+
+async function get_user_permissions(){
+    var username = get_active_username();
+    if (username!==null && username.length>0){
+        let res = await api_get("/user/permissions/"+username);
+        let datajs = await res.json();
+        if (datajs["status"]==="success"){
+            var permissions = datajs["data"];
+            window.localStorage.setItem("permissions", permissions);
+            return permissions;
+        }
+    }
+    return [];
 }

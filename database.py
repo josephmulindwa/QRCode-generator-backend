@@ -28,6 +28,8 @@ class Database:
             result = None
             if fecthable:
                 result = cursor.fetchall()
+            else:
+                result=True
             Database.connection.commit()
             cursor.close()
             return result
