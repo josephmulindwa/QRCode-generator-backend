@@ -9,7 +9,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>SB Admin 2 - Register</title>
+  <title id="main-title"></title>
 
   <!-- Custom fonts for this template-->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -20,64 +20,125 @@
 
 </head>
 
-<body class="bg-gradient-primary">
+<body id="page-top">
 
-  <div class="container">
+  <!-- Page Wrapper -->
+  <div id="wrapper">
 
-    <div class="card o-hidden border-0 shadow-lg my-5">
-      <div class="card-body p-0">
-        <!-- Nested Row within Card Body -->
-        <div class="row">
-          <div class="col-lg-5 d-none d-lg-block bg-register-image"></div>
-          <div class="col-lg-7">
-            <div class="p-5">
-              <div class="text-center">
-                <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
-              </div>
-              <form class="user">
-                <div class="form-group row">
-                  <div class="col-sm-6 mb-3 mb-sm-0">
-                    <input type="text" class="form-control form-control-user" id="exampleFirstName" placeholder="First Name">
-                  </div>
-                  <div class="col-sm-6">
-                    <input type="text" class="form-control form-control-user" id="exampleLastName" placeholder="Last Name">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <input type="email" class="form-control form-control-user" id="exampleInputEmail" placeholder="Email Address">
-                </div>
-                <div class="form-group row">
-                  <div class="col-sm-6 mb-3 mb-sm-0">
-                    <input type="password" class="form-control form-control-user" id="exampleInputPassword" placeholder="Password">
-                  </div>
-                  <div class="col-sm-6">
-                    <input type="password" class="form-control form-control-user" id="exampleRepeatPassword" placeholder="Repeat Password">
-                  </div>
-                </div>
-                <a href="login.html" class="btn btn-primary btn-user btn-block">
-                  Register Account
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <!-- Main Content -->
+      <div id="content">
+
+        <!-- Topbar -->
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+          <!-- Sidebar Toggle (Topbar) -->
+          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+          </button>
+
+          <!-- Topbar Navbar -->
+          <ul class="navbar-nav ml-auto">
+            <div class="topbar-divider d-none d-sm-block"></div>
+
+            <!-- Nav Item - User Information -->
+            <li class="nav-item dropdown no-arrow">
+              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="sidebar-name"></span>
+                <img class="img-profile rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">
+              </a>
+              <!-- Dropdown - User Information -->
+              <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                <a class="dropdown-item" href="#">
+                  <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Profile
                 </a>
-                <hr>
-                <a href="index.html" class="btn btn-google btn-user btn-block">
-                  <i class="fab fa-google fa-fw"></i> Register with Google
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                  <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                  Logout
                 </a>
-                <a href="index.html" class="btn btn-facebook btn-user btn-block">
-                  <i class="fab fa-facebook-f fa-fw"></i> Register with Facebook
-                </a>
-              </form>
-              <hr>
-              <div class="text-center">
-                <a class="small" href="forgot-password.html">Forgot Password?</a>
               </div>
-              <div class="text-center">
-                <a class="small" href="login.html">Already have an account? Login!</a>
-              </div>
-            </div>
+            </li>
+
+          </ul>
+
+        </nav>
+        <!-- End of Topbar -->
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+
+          <!-- Page Heading -->
+          <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Create User</h1>
           </div>
+          <form id="mainform" onsubmit="return false" class="user">
+            <div class="form-group">
+                <input type="text" class="form-control form-control-user" id="name" placeholder="Name">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control form-control-user" id="username" placeholder="Username">
+            </div>
+            <div class="form-group">
+                <input type="email" class="form-control form-control-user" id="email" placeholder="Email Address">
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                <input type="password" class="form-control form-control-user" id="password" placeholder="Password">
+                </div>
+                <div class="col-sm-6">
+                <input type="password" class="form-control form-control-user" id="repassword" placeholder="Repeat Password">
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Register Account</button>
+            </form>
+        </div>
+        <!-- /.container-fluid -->
+
+      </div>
+      <!-- End of Main Content -->
+
+      <!-- Footer -->
+      <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>Copyright &copy; QRGEN 2023</span>
+          </div>
+        </div>
+      </footer>
+      <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+  </div>
+  <!-- End of Page Wrapper -->
+
+  <!-- Scroll to Top Button-->
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+  <!-- Logout Modal-->
+  <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+          <a class="btn btn-primary" href="login.html">Logout</a>
         </div>
       </div>
     </div>
-
   </div>
 
   <!-- Bootstrap core JavaScript-->
@@ -89,6 +150,89 @@
 
   <!-- Custom scripts for all pages-->
   <script src="js/sb-admin-2.min.js"></script>
+
+  <!-- Page level custom scripts -->
+  <script src="js/utils.js"></script>
+
+  <script>
+    var name = get_active_name();
+    console.log("name :", name);
+
+    // FILLING PAGE
+    document.getElementById("main-title").innerText = name;
+    document.getElementById("sidebar-name").innerText = name;
+
+    var get_form_data = function(){
+        var mainform = document.getElementById("mainform");
+        var name=mainform.name.value;
+        var username=mainform.username.value;
+        var email=mainform.email.value;
+        var password=mainform.password.value;
+        var repassword=mainform.repassword.value;
+        return [name,username,email,password,repassword];
+    }
+
+    function validate_form(){
+        formdata = get_form_data();
+        var name=formdata[0];
+        var username=formdata[1];
+        var email=formdata[2];
+        var password=formdata[3];
+        var repassword=formdata[4];
+
+        var msg = null;
+        if(!validate_string(name)){
+            msg = "Name not set correctly";
+        }else if(!validate_string(username) || username.indexOf(" ")>0){
+            msg = "Username not set correctly, ensure no spaces";
+        }else if(!validate_string(email)){
+            msg = "Email not set correctly";
+        }else if(!validate_string(password)){
+            msg = "Password not set correctly";
+        }else if(!validate_string(repassword)){
+            msg = "Re-entered password not set correctly";
+        }else if(password !== repassword){
+            msg = "Passwords don't match";
+        }
+        return msg;
+    }
+
+    async function send_data(){
+        var msg = validate_form();
+        if (msg!==null){
+            alert(msg);
+            return;
+        }
+
+        formdata = get_form_data();
+        var name=formdata[0];
+        var username=formdata[1];
+        var email=formdata[2];
+        var password=formdata[3];
+
+        var fdata = new FormData();
+        fdata.append("name",name);
+        fdata.append("username",username);
+        fdata.append("email",email);
+        fdata.append("password",password);
+        fdata.append("created_by","superuser");
+
+        var res = await api_post("/user/add?register=true", fdata);
+        var datajs = await res.json();
+        console.log("DATAJS :", datajs);
+        if (datajs["status"]!=="success"){
+            alert(datajs["message"]);
+        }else{
+            alert(datajs["data"]);
+            window.location.href="login.html";
+        }
+
+        /*
+        pause, cancel, downloads, progress
+        */
+    }
+    
+  </script>
 
 </body>
 

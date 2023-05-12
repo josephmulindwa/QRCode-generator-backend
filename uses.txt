@@ -1,18 +1,13 @@
 @param docs
 req->delete files,pause, cancel, downloads, progress[view page]
 
-*try-catch all routes
-
 my projects, user projects@admin
 
 sort projects by date
 
 to-do
--create-unapproved-account
+-approved-account
 -edit user if you have password
--edit user permissions
-
--conditional renders
 -table-limit
 -regen
 - /edit

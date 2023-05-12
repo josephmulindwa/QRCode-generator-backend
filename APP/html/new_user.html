@@ -223,7 +223,6 @@
         fdata.append("created_by","superuser");
 
         var res = await api_post("/user/add", fdata);
-        console.log(await res.text());
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
