@@ -261,18 +261,16 @@
       var fgcolor=formdata[6];
       var bgcolor=formdata[7];
 
-      var jsondata = {
-          "name":name,
-          "version":version,
-          "folder_batch":folder_batch,
-          "error_correction":error_correction,
-          "box_size":box_size,
-          "border":border,
-          "fore_color":fgcolor,
-          "back_color":bgcolor
-      }
+      var fdata = new FormData();
+      fdata.append("name",name);
+      fdata.append("folder_batch",folder_batch);
+      fdata.append("error_correction",error_correction);
+      fdata.append("box_size",box_size);
+      fdata.append("border",border);
+      fdata.append("fore_color",fgcolor);
+      fdata.append("back_color",bgcolor);
 
-      var res = await api_post("/config/preview", jsondata);
+      var res = await api_post("/configuration/preview", fdata);
       var data_js = await res.json();
       if(data_js["status"]==="success"){
         var data = data_js["data"];
@@ -284,7 +282,7 @@
     async function fill_from_data(){
       var name = window.localStorage.getItem("config-name");
       if (validate_string(name)){
-        var res = await api_get("/configurations/get/"+name);
+        var res = await api_get("/configuration/get?name="+name);
         var datajs = await res.json();
         console.log(datajs);
 

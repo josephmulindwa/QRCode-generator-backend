@@ -173,12 +173,12 @@
       var username = window.localStorage.getItem("user-name");
       console.log("username :"+username);
 
-      var jsondata = {"username":username, "listing":checked_permission_codes}
-      //jsondata = JSON.stringify(jsondata);
+      var fdata = new FormData();
+      fdata.append("username",username);
+      fdata.append("permissions",JSON.stringify(checked_permission_codes));
+      console.log("FORM :", ...fdata);
 
-      console.log("JSON :", jsondata);
-
-        var res = await api_post("/permissions/set", jsondata);
+        var res = await api_post("/permission/set", fdata);
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
@@ -193,14 +193,14 @@
       var username = window.localStorage.getItem("user-name");
       console.log("--username :"+username);
       if (validate_string(username)){
-        let permission_get_response = await api_get("/permissions");
+        let permission_get_response = await api_get("/permission/list");
         var datajs = await permission_get_response.json();
 
         console.log("DATAJS :", datajs);
 
         if (datajs["status"]==="success"){
           var all_permissions = datajs["data"];
-          let user_permission_response = await api_get("/user/permissions/"+username);
+          let user_permission_response = await api_get("/user/permissions?username="+username);
           datajs = await user_permission_response.json();
           var granted_permissions = [];
           if (datajs["status"]==="success"){
@@ -212,9 +212,9 @@
           var html_string="";
           for (var i=0; i<all_permissions.length; i++){
             var uid = "permission_"+i;
-            var perm_name=all_permissions[i];
-            var perm_code=all_permissions[i];
-            var checked = Boolean(granted_permissions.indexOf(perm_name)!=-1);
+            var perm_name=all_permissions[i].name;
+            var perm_code=all_permissions[i].code;
+            var checked = Boolean(granted_permissions.indexOf(perm_code)!=-1);
             if (checked){
               checkables.push(uid);
             }

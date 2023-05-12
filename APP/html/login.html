@@ -109,12 +109,11 @@
       var identifier = formdata[0];
       var password = formdata[1];
 
-      var jsondata = {
-        "identifier":identifier,
-        "password":password
-      }
+      var fdata = new FormData();
+      fdata.append("identifier", identifier);
+      fdata.append("password", password);
 
-      var res = await api_post("/login", jsondata);
+      var res = await api_post("/user/login", fdata);
       var datajs = await res.json();
       console.log(datajs)
       if (datajs["status"]==="success"){
@@ -122,6 +121,13 @@
         window.localStorage.setItem("token", data['token']);
         window.localStorage.setItem("username", data["username"]);
         window.localStorage.setItem("name", data["name"]);
+        
+        await get_user_permissions();
+
+        if(window.localStorage.getItem("permissions")===null){
+          alert("not set!");
+          return;
+        }
 
         window.location.href = "index.html";
       }else{

@@ -97,8 +97,7 @@
   <script>
     
     function fill_from_permissions(){
-      get_user_permissions();
-      var permissions = window.localStorage.getItem("permissions").split(",");
+      var permissions = window.localStorage.getItem("permissions");
       console.log("@PERM :", permissions);
 
       // new project section

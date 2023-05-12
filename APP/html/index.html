@@ -237,14 +237,13 @@
     document.getElementById("sidebar-name").innerText = name;
 
     function fill_from_permissions(){
-      get_user_permissions();
-      var permissions = window.localStorage.getItem("permissions").split(",");
+      var permissions = window.localStorage.getItem("permissions");
       document.getElementById("user-count-card").style.display = permissions.includes("VIEW_USERS") ? "initial":"none";
     }
     fill_from_permissions();
 
     async function super_fetch_and_set_user_count(){
-      let response = await api_get("/users/count");
+      let response = await api_get("/user/count");
       var datajs = await response.json();
       var count=0;
       if (datajs["status"]=="success"){
@@ -256,7 +255,7 @@
     }
 
     async function super_fetch_and_set_request_count(category, target_id){
-      let response = await api_get("/projects/count/"+category);
+      let response = await api_get("/project/count/?category="+category);
       var datajs = await response.json();
       var count=0;
       if (datajs["status"]=="success"){

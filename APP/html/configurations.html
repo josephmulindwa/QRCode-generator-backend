@@ -148,7 +148,6 @@
                   <thead>
                     <tr>
                       <th>Name</th>
-                      <th>Version</th>
                       <th>Folder Batch</th>
                       <th>Error Correction</th>
                       <th>Box Size</th>
@@ -260,7 +259,6 @@
         var id_core = obj['name'];
         var row = "<tr id='"+id_core+"-tr'>"
         row += "<td>"+obj["name"]+"</td>";
-        row += "<td>"+obj["version"]+"</td>";
         row += "<td>"+obj["folder_batch"]+"</td>";
         row += "<td>"+obj["error_correction"]+"</td>";
         row += "<td>"+obj["box_size"]+"</td>";
@@ -299,7 +297,7 @@
         var start=qdata[1];
         var limit=qdata[2];
 
-        var res = await api_get("/configurations/list");
+        var res = await api_get("/configuration/list");
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){

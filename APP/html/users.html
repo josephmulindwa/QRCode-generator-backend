@@ -291,7 +291,7 @@
         var start=qdata[1];
         var limit=qdata[2];
 
-        var res = await api_get("/users/list");
+        var res = await api_get("/user/list");
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){

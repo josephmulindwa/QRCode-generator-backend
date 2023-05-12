@@ -264,18 +264,16 @@
         var fgcolor=formdata[6];
         var bgcolor=formdata[7];
 
-        var jsondata = {
-            "name":name,
-            "version":version,
-            "folder_batch":folder_batch,
-            "error_correction":error_correction,
-            "box_size":box_size,
-            "border":border,
-            "fore_color":fgcolor,
-            "back_color":bgcolor
-        }
+        var fdata = new FormData();
+        fdata.append("name",name);
+        fdata.append("folder_batch",folder_batch);
+        fdata.append("error_correction",error_correction);
+        fdata.append("box_size",box_size);
+        fdata.append("border",border);
+        fdata.append("fore_color",fgcolor);
+        fdata.append("back_color",bgcolor);
 
-        var res = await api_post("/configurations/add", jsondata);
+        var res = await api_post("/configuration/add", fdata);
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
@@ -287,7 +285,7 @@
     }
 
     async function fetch_and_set_error_corrections(){
-      var res = await api_get("/configurations/error_correction_levels");
+      var res = await api_get("/configuration/error_levels");
       var datajs = await res.json();
       if(datajs["status"]=="success"){
         var levelhtml="";
@@ -312,7 +310,6 @@
 
       var formdata = get_form_data();
       var name=formdata[0];
-      var version=formdata[1];
       var folder_batch=formdata[2];
       var error_correction=formdata[3];
       var box_size=formdata[4];
@@ -320,18 +317,16 @@
       var fgcolor=formdata[6];
       var bgcolor=formdata[7];
 
-      var jsondata = {
-          "name":name,
-          "version":version,
-          "folder_batch":folder_batch,
-          "error_correction":error_correction,
-          "box_size":box_size,
-          "border":border,
-          "fore_color":fgcolor,
-          "back_color":bgcolor
-      }
+      var fdata = new FormData();
+      fdata.append("name",name);
+      fdata.append("folder_batch",folder_batch);
+      fdata.append("error_correction",error_correction);
+      fdata.append("box_size",box_size);
+      fdata.append("border",border);
+      fdata.append("fore_color",fgcolor);
+      fdata.append("back_color",bgcolor);
 
-      var res = await api_post("/config/preview", jsondata);
+      var res = await api_post("/configuration/preview", fdata);
       var data_js = await res.json();
       if(data_js["status"]==="success"){
         var data = data_js["data"];

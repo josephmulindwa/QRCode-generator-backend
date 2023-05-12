@@ -30,17 +30,18 @@ function detect_access_uri(){
     return final;
 }
 
-async function api_post(url, jsondata){
+async function api_post(url, data){
     // posts and returns raw response
-    var base_url = detect_access_uri()+"/api";
+    var base_url = "http://localhost/qrcode/index.php";
     var url=base_url+url;
     let token = window.localStorage.getItem("token");
 
     try{
         let response = fetch(url, 
             {
-                method:'POST', body:JSON.stringify(jsondata),
-                headers: { "Content-type": "application/json; charset=UTF-8", "Authorization":"bearer "+token}
+                method:'POST', 
+                body:data,
+                headers: {"Authorization":"bearer "+token}
             }
             );
         let res = await response;
@@ -51,7 +52,7 @@ async function api_post(url, jsondata){
 }
 
 async function api_get(url){
-    var base_url = detect_access_uri()+"/api";
+    var base_url = "http://localhost/qrcode/index.php";
     var url=base_url+url;
     console.log("GET :", url);
     let token = window.localStorage.getItem("token");
@@ -86,10 +87,10 @@ function get_active_name(){
 async function get_user_permissions(){
     var username = get_active_username();
     if (username!==null && username.length>0){
-        let res = await api_get("/user/permissions/"+username);
+        let res = await api_get("/user/permissions?username="+username);
         let datajs = await res.json();
         if (datajs["status"]==="success"){
-            var permissions = datajs["data"];
+            var permissions = JSON.stringify(datajs["data"]);
             window.localStorage.setItem("permissions", permissions);
             return permissions;
         }

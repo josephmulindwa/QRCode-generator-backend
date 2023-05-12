@@ -259,21 +259,20 @@
       var csv_serial_length=formdata[5];
       var pre_string = formdata[6];
       var pro_string = formdata[7];
-      var config_name = "default_config";
+      var config_name = formdata[8];
 
-      var jsondata = {
-          "name":name,
-          "start_value":startvalue,
-          "count":count,
-          "description":description,
-          "qr_serial_length":qr_serial_length,
-          "csv_serial_length":csv_serial_length,
-          "pre_string":pre_string,
-          "pro_string":pro_string,
-          "config_name":config_name
-      }
+      var fdata = new FormData();
+      fdata.append("name",name);
+      fdata.append("start_value",startvalue);
+      fdata.append("total",count);
+      fdata.append("description",description);
+      fdata.append("qr_serial_length",qr_serial_length);
+      fdata.append("csv_serial_length",csv_serial_length);
+      fdata.append("pre_string",pre_string);
+      fdata.append("pro_string",pro_string);
+      fdata.append("config_name",config_name);
 
-      var res = await api_post("/preview/image", jsondata);
+      var res = await api_post("/project/preview_image", fdata);
       var data_js = await res.json();
       if(data_js["status"]==="success"){
         var data = data_js["data"];
@@ -281,7 +280,7 @@
         document.getElementById("preview-image").src = b;
       }
 
-      var res = await api_post("/preview/text", jsondata);
+      var res = await api_post("/project/preview_text", fdata);
       let datajs = await res.json();
       if(datajs["status"]==="success"){
         console.log("RESPONSE :", datajs);
@@ -294,7 +293,7 @@
     async function fill_from_data(){
       var name = window.localStorage.getItem("project-name");
       if (validate_string(name)){
-        var res = await api_get("/projects/get/"+name);
+        var res = await api_get("/project/get?name="+name);
         var datajs = await res.json();
         console.log(datajs);
 

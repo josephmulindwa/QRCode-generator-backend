@@ -229,15 +229,14 @@
         var email=formdata[2];
         var password=formdata[3];
 
-        var jsondata = {
-            "name":name,
-            "username":username,
-            "email":email,
-            "password":password,
-            "created_by":"superuser"
-        }
+        var fdata = new FormData();
+        fdata.append("name",name);
+        fdata.append("username",username);
+        fdata.append("email",email);
+        fdata.append("password",password);
+        fdata.append("created_by","superuser");
 
-        /*var res = await api_post("/user/add", jsondata);
+        /*var res = await api_post("/user/edit", jsondata);
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
@@ -251,7 +250,7 @@
     async function fill_from_data(){
       var username = window.localStorage.getItem("user-name");
       if (validate_string(username)){
-        var res = await api_get("/users/get/"+username);
+        var res = await api_get("/user/get?username="+username);
         var datajs = await res.json();
         console.log(datajs);
 
