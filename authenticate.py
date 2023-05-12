@@ -83,7 +83,6 @@ def is_jwt_valid(jwt):
     is_token_expired = (expiration - time.time()) <= 0
     
     #build a signature based on the header and payload using the secret
-
     test_jwt = generate_jwt(headers, payload)
     test_jwt_parts = test_jwt.split(".")
     test_jwt_signature = test_jwt_parts[2]

@@ -16,3 +16,4 @@ to-do
 -table-limit
 -regen
 - /edit
+- /fetch && fill correct configs by join in view_project

@@ -274,6 +274,7 @@
 
       var res = await api_post("/project/preview_image", fdata);
       var data_js = await res.json();
+      console.log("IMAGE :", data_js);
       if(data_js["status"]==="success"){
         var data = data_js["data"];
         var b = "data:image/gif;base64,"+data;
@@ -307,7 +308,7 @@
           mainform.csv_serial_length.value=data["csv_serial_length"];
           mainform.pre_string.value = data["pre_string"];
           mainform.pro_string.value = data["pro_string"];
-          // mainform.config_name.value = data["config_name"];
+          mainform.configurations.value = "default_config"; //data["config_name"];
           window.localStorage.setItem("project-name", data["name"]);
 
           update_preview_section();
