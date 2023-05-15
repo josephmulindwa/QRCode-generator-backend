@@ -6,9 +6,6 @@ my projects, user projects@admin
 sort projects by date
 
 to-do
--approved-account
--edit user if you have password
 -table-limit
 -regen
-- /edit
-- /fetch && fill correct configs by join in view_project
+-/fetch && fill correct configs by join in view_project

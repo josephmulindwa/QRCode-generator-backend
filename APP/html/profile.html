@@ -98,17 +98,17 @@
                 <input type="text" class="form-control form-control-user" id="name" placeholder="Name">
             </div>
             <div class="form-group">
-                <input type="text" class="form-control form-control-user" id="username" placeholder="Username">
+                <input type="text" class="form-control form-control-user" id="username" placeholder="Username" disabled="true">
             </div>
             <div class="form-group">
                 <input type="email" class="form-control form-control-user" id="email" placeholder="Email Address">
             </div>
             <div class="form-group row">
                 <div class="col-sm-6 mb-3 mb-sm-0">
-                <input type="password" class="form-control form-control-user" id="password" placeholder="Password">
+                <input type="password" class="form-control form-control-user" id="password" placeholder="Old Password">
                 </div>
                 <div class="col-sm-6">
-                <input type="password" class="form-control form-control-user" id="repassword" placeholder="Repeat Password">
+                <input type="password" class="form-control form-control-user" id="repassword" placeholder="New Password">
                 </div>
             </div>
             <button type="button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Save</button>
@@ -210,8 +210,6 @@
             msg = "Password not set correctly";
         }else if(!validate_string(repassword)){
             msg = "Re-entered password not set correctly";
-        }else if(password !== repassword){
-            msg = "Passwords don't match";
         }
         return msg;
     }
@@ -227,24 +225,25 @@
         var name=formdata[0];
         var username=formdata[1];
         var email=formdata[2];
-        var password=formdata[3];
+        var password_old=formdata[3];
+        var password_new=formdata[4];
 
         var fdata = new FormData();
         fdata.append("name",name);
         fdata.append("username",username);
         fdata.append("email",email);
-        fdata.append("password",password);
-        fdata.append("created_by","superuser");
+        fdata.append("password_old",password_old);
+        fdata.append("password_new",password_new);
 
-        /*var res = await api_post("/user/edit", jsondata);
+        var res = await api_post("/user/edit", fdata);
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
             alert(datajs["message"]);
         }else{
             alert(datajs["data"]);
-            // go to some page
-        }*/
+            window.location.href="profile.html";
+        }
     }
 
     async function fill_from_data(){
@@ -259,21 +258,37 @@
           mainform.name.value=data["name"];
           mainform.email.value=data["email"];
           mainform.username.value=data["username"];
+          mainform.password.value=data["password"];
+          mainform.repassword.value=data["password"];
 
           let approved = data["approved"];
-          if (!Boolean(approved)){
-            var ahtml = `
-              <div class="dropdown-divider"></div>
-              <span class="dropdown-item" onclick="">
-                Approve Account
-              </span>`;
+          var approve_action_string = !Boolean(approved) ? "Approve Account" : "Disable Account";
+          var approve_action_state = !Boolean(approved) ? 1 : 0;
+          var ahtml = `
+            <div class="dropdown-divider"></div>
+            <span class="dropdown-item" onclick="set_approved_state(`+approve_action_state+`)">
+              `+approve_action_string+`
+            </span>`;
             document.getElementById("approve-section").innerHTML=ahtml;
-          }
 
         }
       }
     }
     fill_from_data();
+
+    async function set_approved_state(approve){
+      var username = window.localStorage.getItem("user-name");
+      if (validate_string(username)){
+        let res = await api_get("/user/approve?username="+username+"&approve="+approve);
+        let datajs = await res.json();
+        if (datajs['status']==="failed"){
+          alert(datajs["message"]);
+        }else{
+          alert(datajs["data"]);
+          window.location.href="profile.html";
+        }
+      }
+    }
     
   </script>
 
