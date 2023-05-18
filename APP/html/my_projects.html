@@ -264,10 +264,18 @@
       for(var i=0; i<data.length; i++){
         var obj = data[i];
         var id_core=obj["name"];
+        var state_change_data = [];
+        if(obj["state"]==="ACTIVE"){
+          state_change_data = ["Pause", "pause"];
+        }else if(obj["state"]==="PAUSED"){
+          state_change_data = ["Resume", "resume"];
+        }else if(obj["state"]==="COMPLETED"){
+          state_change_data = ["Bill", "bill"];
+        }
 
         var row = "<tr><td>"+obj["name"]+"</td>";
         row += "<td>"+obj["description"]+"</td>";
-        row += "<td>"+obj["start"]+"</td>";
+        row += "<td>"+obj["start_value"]+"</td>";
         row += "<td>"+obj["total"]+"</td>";
         row += "<td>"+obj["created_on"]+"</td>";
         row += "<td>"+obj["state"]+"</td>";
@@ -277,13 +285,15 @@
             <div class="dropdown-container" tabindex="-1">
               <div class="three-dots"></div>
               <div class="dropdown">
-                <div id='`+id_core+`' onclick="prepare_and_load_view(this)" class="mr-2 ml-2 text-gray-400">
+                <div id='view.`+id_core+`' onclick="prepare_and_load_view(this)" class="mr-2 ml-2 text-gray-400">
                   <span>View</span>
-                </div>
-                <div class="mr-2 ml-2 text-gray-400">
-                  <span>Pause</span>
-                </div>
-                <div class="mr-2 ml-2 text-gray-400">
+                </div>`;
+        row += (state_change_data.length==0)?(""):
+                `<div id='change.`+id_core+`' class="mr-2 ml-2 text-gray-400" onclick="handle_state_change(this,'`+state_change_data[1]+`')">
+                  <span>`+state_change_data[0]+`</span>
+                </div>`;
+
+        row +=  `<div id='cancel.`+id_core+`' class="mr-2 ml-2 text-gray-400" onclick="cancel_project(this)">
                   <span>Cancel</span>
                 </div>
               </div>
@@ -362,10 +372,27 @@
     async function prepare_and_load_view(e){
       e = e || window.event;
       var src = e.target || e.srcElement;
-
-      console.log("E :", e.id);
-      window.localStorage.setItem("project-name", e.id);
+      var _id = e.id;
+      let name = _id.split(".")[1];
+      console.log("project-name :", name);
+      window.localStorage.setItem("project-name", name);
       window.location.href = "view_project.html";
+    }
+
+    async function handle_state_change(e, to_state){
+      console.log("STATE :", to_state);
+      e = e || window.event;
+      var src = e.target || e.srcElement;
+      var _id = e.id;
+      console.log(_id);
+      let name = _id.split(".")[1];
+      let res = await api_get("/project/"+to_state+"?name="+name);
+      let datajs = await res.json();
+      if (datajs['status']==="success"){
+        window.location.href = "my_project.html";
+      }else{
+        alert(datajs['message']);
+      }
     }
     
   </script>

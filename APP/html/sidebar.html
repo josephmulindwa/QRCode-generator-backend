@@ -101,12 +101,12 @@
       console.log("@PERM :", permissions);
 
       // new project section
-      document.getElementById("new-project-section").style.display = permissions.includes("CREATE_PROJECTS") ? "initial":"none";
-      document.getElementById("view-m-projects-section").style.display = permissions.includes("VIEW_M_PROJECTS") ? "initial":"none";
-      document.getElementById("view-u-projects-section").style.display = permissions.includes("VIEW_U_PROJECTS") ? "initial":"none";
-      document.getElementById("users-section").style.display = (permissions.includes("CREATE_USERS") || permissions.includes("VIEW_USERS")) ? "initial":"none";
-      document.getElementById("new-user-section").style.display = permissions.includes("CREATE_USERS") ? "initial":"none";
-      document.getElementById("view-users-section").style.display = permissions.includes("VIEW_USERS") ? "initial":"none";
+      document.getElementById("new-project-section").style.display = permissions!==null && permissions.includes("CREATE_PROJECTS") ? "initial":"none";
+      document.getElementById("view-m-projects-section").style.display = permissions!==null && permissions.includes("VIEW_M_PROJECTS") ? "initial":"none";
+      document.getElementById("view-u-projects-section").style.display = permissions!==null && permissions.includes("VIEW_U_PROJECTS") ? "initial":"none";
+      document.getElementById("users-section").style.display = permissions!==null && (permissions.includes("CREATE_USERS") || permissions.includes("VIEW_USERS")) ? "initial":"none";
+      document.getElementById("new-user-section").style.display = permissions!==null && permissions.includes("CREATE_USERS") ? "initial":"none";
+      document.getElementById("view-users-section").style.display = permissions!==null && permissions.includes("VIEW_USERS") ? "initial":"none";
     }
     fill_from_permissions();
   </script>

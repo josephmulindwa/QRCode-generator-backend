@@ -238,7 +238,7 @@
 
     function fill_from_permissions(){
       var permissions = window.localStorage.getItem("permissions");
-      document.getElementById("user-count-card").style.display = permissions.includes("VIEW_USERS") ? "initial":"none";
+      document.getElementById("user-count-card").style.display = permissions!==null && permissions.includes("VIEW_USERS") ? "initial":"none";
     }
     fill_from_permissions();
 

@@ -9,3 +9,8 @@ to-do
 -table-limit
 -regen
 -/fetch && fill correct configs by join in view_project
+
+
+>> onCheckProgress -> fetch-project->
+>> if active -> execute(@progress)
+>> 
