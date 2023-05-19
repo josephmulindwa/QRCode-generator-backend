@@ -238,7 +238,7 @@
     console.log("name :", name);
 
     // FILLING PAGE
-    document.getElementById("main-title").innerText = name;
+    document.getElementById("main-title").innerText = get_app_name() + " - Projects";
     document.getElementById("sidebar-name").innerText = name;
 
     var get_data = function(){
@@ -263,7 +263,8 @@
       var content="";
       for(var i=0; i<data.length; i++){
         var obj = data[i];
-        var id_core = obj['name'];
+        var id_core=obj["name"];
+
         var row = "<tr><td>"+obj["name"]+"</td>";
         row += "<td>"+obj["description"]+"</td>";
         row += "<td>"+obj["start_value"]+"</td>";
@@ -276,7 +277,7 @@
             <div class="dropdown-container" tabindex="-1">
               <div class="three-dots"></div>
               <div class="dropdown">
-                <div id='`+id_core+`' onclick="prepare_and_load_config_view(this)" class="mr-2 ml-2 text-gray-400">
+                <div id='view.`+id_core+`' onclick="prepare_and_load_view(this)" class="mr-2 ml-2 text-gray-400">
                   <span>View</span>
                 </div>
               </div>
@@ -301,8 +302,7 @@
         var start=qdata[1];
         var limit=qdata[2];
 
-        console.log("MAKING Project");
-        var res = await api_get("/projects/"+category);
+        var res = await api_get("/project/list?category="+category+"&users=true");
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
@@ -340,17 +340,27 @@
         return;
       }
       
-      var res = await api_get("/projects/search/"+text);
+      var res = await api_get("/project/search?text="+text);
       var datajs = await res.json();
       console.log("DATAJS :", datajs);
       if (datajs["status"]!=="success"){
         alert(datajs["message"]);
       }else{
-        var projects = datajs["data"];
-        var rows = table_from_data(projects);
+        var requests = datajs["data"];
+        var rows = table_from_data(requests);
         var table_body = document.getElementById("table-body");
         table_body.innerHTML = rows;
       }
+    }
+
+    async function prepare_and_load_view(e){
+      e = e || window.event;
+      var src = e.target || e.srcElement;
+      var _id = e.id;
+      let name = _id.split(".")[1];
+      console.log("project-name :", name);
+      window.localStorage.setItem("project-name", name);
+      window.location.href = "view_project.html";
     }
     
   </script>

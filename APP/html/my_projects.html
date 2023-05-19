@@ -238,7 +238,7 @@
     console.log("name :", name);
 
     // FILLING PAGE
-    document.getElementById("main-title").innerText = name;
+    document.getElementById("main-title").innerText = get_app_name()+" - My Projects";
     document.getElementById("sidebar-name").innerText = name;
 
     var get_data = function(){
@@ -287,14 +287,6 @@
               <div class="dropdown">
                 <div id='view.`+id_core+`' onclick="prepare_and_load_view(this)" class="mr-2 ml-2 text-gray-400">
                   <span>View</span>
-                </div>`;
-        row += (state_change_data.length==0)?(""):
-                `<div id='change.`+id_core+`' class="mr-2 ml-2 text-gray-400" onclick="handle_state_change(this,'`+state_change_data[1]+`')">
-                  <span>`+state_change_data[0]+`</span>
-                </div>`;
-
-        row +=  `<div id='cancel.`+id_core+`' class="mr-2 ml-2 text-gray-400" onclick="cancel_project(this)">
-                  <span>Cancel</span>
                 </div>
               </div>
             </div>
@@ -377,22 +369,6 @@
       console.log("project-name :", name);
       window.localStorage.setItem("project-name", name);
       window.location.href = "view_project.html";
-    }
-
-    async function handle_state_change(e, to_state){
-      console.log("STATE :", to_state);
-      e = e || window.event;
-      var src = e.target || e.srcElement;
-      var _id = e.id;
-      console.log(_id);
-      let name = _id.split(".")[1];
-      let res = await api_get("/project/"+to_state+"?name="+name);
-      let datajs = await res.json();
-      if (datajs['status']==="success"){
-        window.location.href = "my_project.html";
-      }else{
-        alert(datajs['message']);
-      }
     }
     
   </script>

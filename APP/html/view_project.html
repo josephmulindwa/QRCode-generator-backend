@@ -52,16 +52,10 @@
               <!-- Dropdown - User Information -->
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
                 <span class="dropdown-item" onclick="window.location.href='downloads.html'">
-                  Downloads
+                  Progress
                 </span>
-                <div class="dropdown-divider"></div>
-                <span class="dropdown-item" onclick="">
-                  Pause
-                </span>
-                <div class="dropdown-divider"></div>
-                <span class="dropdown-item" onclick="">
-                  Cancel
-                </span>
+                <div id="state-change-button"></div>
+                <div id="cancel-button"></div>
               </div>
             </li>
 
@@ -101,19 +95,23 @@
           </div>
             <form id="mainform" onsubmit="return false">
               <div class="form-group row">
-                <div class="col-sm-2">
-                    <div>Project Name</div>
-                </div>
+                <div class="col-sm-2">Project Name</div>
                 <div class="col-sm-6 mb-3 mb-sm-0">
                   <input type="text" class="form-control form-control-user" id="name" disabled="true">
                 </div>
+             </div>
+            <div class="form-group row">
+              <div class="col-sm-2">State</div>
+              <div class="col-sm-6 mb-3 mb-sm-0">
+                <input type="text" class="form-control form-control-user" id="state" disabled="true">
+              </div>
             </div>
             <div class="form-group row">
               <div class="col-sm-2">Description</div>
               <div class="col-sm-6 mb-3 mb-sm-0">
                 <input type="text" cols="2" class="form-control form-control-user" id="description" placeholder="Description" disabled="true">
               </div>
-          </div>
+            </div>
             <div class="form-group row">
                 <div class="col-sm-2">
                     <div>Start Value</div>
@@ -231,7 +229,7 @@
     console.log("name :", name);
 
     // FILLING PAGE
-    document.getElementById("main-title").innerText = "QR Code Generator";
+    document.getElementById("main-title").innerText = get_app_name() + " - Project";
     document.getElementById("sidebar-name").innerText = name;
 
     var get_form_data = function(){
@@ -291,6 +289,66 @@
       }
     }
 
+    async function handle_state_change(to_state){
+      let name = window.localStorage.getItem("project-name");
+      if (validate_string(name)){
+        let res = await api_get("/project/"+to_state+"?name="+name);
+        let datajs = await res.json();
+        if (datajs['status']==="success"){
+          window.location.href = "my_projects.html";
+        }else{
+          alert(datajs['message']);
+        }
+      }
+    }
+
+    function set_state_change_button_content(current_state){
+      var state_text=null;
+      var callable=null;
+      var cancel_text=null;
+      console.log("STATE :", current_state);
+      if(current_state==="ACTIVE"){
+        state_text="Pause";
+        callable="pause";
+        cancel_text="Cancel";
+      }else if(current_state==="PAUSED"){
+        state_text="Resume";
+        callable="resume";
+        cancel_text="Cancel";
+      }else if(current_state==="COMPLETE"){
+        let permissions = window.localStorage.getItem("permissions");
+        var can_bill = permissions!==null && permissions.includes("BILL_PROJECTS");
+        if (can_bill){
+          state_text="Bill";
+          callable="bill";
+        }
+      }else if(current_state==="CANCELLED"){
+        let permissions = window.localStorage.getItem("permissions");
+        var can_delete = permissions!==null && permissions.includes("DELETE_PROJECTS");
+        if (can_delete){
+          state_text="Delete";
+          callable="delete";
+        }
+      }
+
+      if(state_text!==null){
+        var shtml = `<div class="dropdown-divider"></div>`;
+        shtml += `<span class="dropdown-item" onclick="handle_state_change('`+callable+`')">`;
+        shtml += state_text;
+        shtml += `</span>`;
+        document.getElementById("state-change-button").innerHTML = shtml;
+      }
+
+      if(cancel_text!==null){
+        var chtml = `<div class="dropdown-divider"></div>`;
+        chtml += `<span class="dropdown-item" onclick="handle_state_change('cancel')">`;
+        chtml += cancel_text;
+        chtml += `</span>`;
+        document.getElementById("cancel-button").innerHTML = chtml;
+      }
+
+    }
+
     async function fill_from_data(){
       var name = window.localStorage.getItem("project-name");
       if (validate_string(name)){
@@ -301,6 +359,7 @@
         if (datajs["status"]==="success"){
           data = datajs["data"];
           mainform.name.value=data["name"];
+          mainform.state.value=data["state"];
           mainform.startvalue.value=data["start_value"];
           mainform.count.value=data["total"];
           mainform.description.value=data["description"];
@@ -312,6 +371,7 @@
           window.localStorage.setItem("project-name", data["name"]);
 
           update_preview_section();
+          set_state_change_button_content(data["state"]);
         }else{
           alert(datajs["message"]);
         }

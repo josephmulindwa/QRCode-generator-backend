@@ -30,9 +30,17 @@ function detect_access_uri(){
     return final;
 }
 
+function get_api_uri(){
+    return "http://localhost/qrcode/index.php";
+}
+
+function get_app_name(){
+    return "QRGEN";
+}
+
 async function api_post(url, data){
     // posts and returns raw response
-    var base_url = "http://localhost/qrcode/index.php";
+    var base_url = get_api_uri();
     var url=base_url+url;
     let token = window.localStorage.getItem("token");
 
@@ -52,7 +60,7 @@ async function api_post(url, data){
 }
 
 async function api_get(url){
-    var base_url = "http://localhost/qrcode/index.php";
+    var base_url = get_api_uri();
     var url=base_url+url;
     console.log("GET :", url);
     let token = window.localStorage.getItem("token");

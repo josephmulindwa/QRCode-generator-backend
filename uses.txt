@@ -1,16 +1,10 @@
 @param docs
-req->delete files,pause, cancel, downloads, progress[view page]
-
-my projects, user projects@admin
+req->delete&files,pause,cancel,resume,downloads,progress[view page]
 
 sort projects by date
 
 to-do
 -table-limit
--regen
 -/fetch && fill correct configs by join in view_project
-
-
->> onCheckProgress -> fetch-project->
->> if active -> execute(@progress)
->> 
+-page-titles
+-remove logs
