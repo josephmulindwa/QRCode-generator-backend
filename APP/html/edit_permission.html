@@ -55,7 +55,7 @@
               </a>
               <!-- Dropdown - User Information -->
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                <a class="dropdown-item" href="#">
+                <a class="dropdown-item" href="#" onclick="go_to_profile()">
                   <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                   Profile
                 </a>
@@ -77,11 +77,11 @@
 
           <!-- Page Heading -->
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Edit Permissions</h1>
+            <h1 class="h3 mb-0 text-gray-800" id="page-heading">Edit Permissions</h1>
           </div>
           <form id="mainform" onsubmit="return false" class="user">
             <div id="permission-list"></div>
-            <button type="button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Save</button>
+            <button type="button" id="save-button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Save</button>
             </form>
         </div>
         <!-- /.container-fluid -->
@@ -193,6 +193,14 @@
       var username = window.localStorage.getItem("user-name");
       console.log("--username :"+username);
       if (validate_string(username)){
+        // adjust page
+        var disabled_string="";
+        if(username===get_active_username()){
+          document.getElementById("page-heading").innerText = "Permissions";
+          document.getElementById("save-button").style.display = "none";
+          disabled_string="disabled='true'";
+        }
+        // fill permissions
         let permission_get_response = await api_get("/permission/list");
         var datajs = await permission_get_response.json();
 
@@ -219,7 +227,7 @@
               checkables.push(uid);
             }
             var row = '<div class="form-group">';
-            row+='<input mr-2 type="checkbox" value="'+uid+'" id="'+uid+'" name="'+perm_code+'">';
+            row+='<input mr-2 type="checkbox" value="'+uid+'" id="'+uid+'" name="'+perm_code+'"'+disabled_string+'>';
             row+='<label ml-2 for="'+uid+'">'+perm_name+'</label>';
             row+='</div>';
             html_string+=row;

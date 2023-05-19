@@ -92,6 +92,13 @@ function get_active_name(){
     return name;
 }
 
+function go_to_profile(){
+    var username = get_active_username();
+    window.localStorage.setItem("user-name", username);
+    window.location.href = "profile.html";
+    return true;
+}
+
 async function get_user_permissions(){
     var username = get_active_username();
     if (username!==null && username.length>0){

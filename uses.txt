@@ -1,10 +1,9 @@
 @param docs
-req->delete&files,pause,cancel,resume,downloads,progress[view page]
+req->delete&files
 
 sort projects by date
 
-to-do
+-to-do
 -table-limit
 -/fetch && fill correct configs by join in view_project
--page-titles
 -remove logs
