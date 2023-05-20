@@ -190,6 +190,11 @@
     }
 
     async function fill_from_data(){
+      var stored_permissions = window.localStorage.getItem("permissions");
+      if (!stored_permissions.includes("VIEW_U_PERMISSIONS") && !stored_permissions.includes("VIEW_M_PERMISSIONS")){
+        return;
+      }
+
       var username = window.localStorage.getItem("user-name");
       console.log("--username :"+username);
       if (validate_string(username)){
@@ -199,6 +204,9 @@
           document.getElementById("page-heading").innerText = "Permissions";
           document.getElementById("save-button").style.display = "none";
           disabled_string="disabled='true'";
+        }
+        if(!stored_permissions.includes("GRANT_U_PERMISSIONS")){
+          document.getElementById("save-button").style.display = "none";
         }
         // fill permissions
         let permission_get_response = await api_get("/permission/list");

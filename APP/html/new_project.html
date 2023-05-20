@@ -215,6 +215,10 @@
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name()+" - New Project";
     document.getElementById("sidebar-name").innerText = name;
+    var stored_permissions = window.localStorage.getItem("permissions");
+    if(!stored_permissions.includes("CREATE_PROJECTS")){
+      document.getElementById("content").style.display = "none";
+    }
 
     var get_form_data = function(){
         var mainform = document.getElementById("mainform");
@@ -289,9 +293,10 @@
         fdata.append("pro_string",pro_string);
         fdata.append("config_name",config_name);
 
+        alert("Please wait...");
         var res = await api_post("/project/add", fdata);
         var datajs = await res.json();
-        console.log("DATAJS :", datajs);
+        console.log("DATAJS[ADD] :", datajs);
         if (datajs["status"]!=="success"){
             alert(datajs["message"]);
         }else{

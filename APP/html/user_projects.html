@@ -240,6 +240,7 @@
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name() + " - Projects";
     document.getElementById("sidebar-name").innerText = name;
+    var stored_permissions = window.localStorage.getItem("permissions");
 
     var get_data = function(){
         return [0,20];
@@ -292,6 +293,9 @@
     }
 
     async function request_data_by_category(category){
+        if (!stored_permissions.includes("VIEW_U_PROJECTS")){
+          return;
+        }
         var msg = validate_data();
         if (msg!==null){
             alert(msg);

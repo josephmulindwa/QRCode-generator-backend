@@ -111,7 +111,7 @@
                 <input type="password" class="form-control form-control-user" id="repassword" placeholder="New Password">
                 </div>
             </div>
-            <button type="button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Save</button>
+            <button type="button" id="save-button" class="btn btn-primary btn-user btn-block" onclick="send_data()">Save</button>
             </form>
         </div>
         <!-- /.container-fluid -->
@@ -247,12 +247,23 @@
     }
 
     async function fill_from_data(){
+      var stored_permissions = window.localStorage.getItem("permissions");
+      if(!stored_permissions.includes("EDIT_M_PROFILE") && !stored_permissions.includes("EDIT_U_PROFILES")){
+        document.getElementById("save-button").style.display = "none";
+      }
+
       var username = window.localStorage.getItem("user-name");
       if (validate_string(username)){
         // fill page heading
+        // own:grant->view, own->view->view, other:grant->edit, other->view
         if (username===get_active_username()){
           document.getElementById("page-heading").innerText = "Edit Profile";
+        }
+        if (username===get_active_username() || (!stored_permissions.includes("GRANT_U_PERMISSIONS") && (stored_permissions.includes("VIEW_U_PERMISSIONS") || stored_permissions.includes("VIEW_M_PERMISSIONS")))){
           document.getElementById("permissions-button").innerText = "View Permissions";
+        }
+        if(!stored_permissions.includes("GRANT_U_PERMISSIONS") && !stored_permissions.includes("VIEW_U_PERMISSIONS") && !stored_permissions.includes("VIEW_M_PERMISSIONS")){
+          document.getElementById("permissions-button").style.display = "none";
         }
 
         // fill form
@@ -268,15 +279,17 @@
           mainform.password.value=data["password"];
           mainform.repassword.value=data["password"];
 
-          let approved = data["approved"];
-          var approve_action_string = !Boolean(approved) ? "Approve Account" : "Disable Account";
-          var approve_action_state = !Boolean(approved) ? 1 : 0;
-          var ahtml = `
-            <div class="dropdown-divider"></div>
-            <span class="dropdown-item" onclick="set_approved_state(`+approve_action_state+`)">
-              `+approve_action_string+`
-            </span>`;
-            document.getElementById("approve-section").innerHTML=ahtml;
+          if(stored_permissions.includes("APPROVE_USERS")){
+            let approved = data["approved"];
+            var approve_action_string = !Boolean(approved) ? "Approve Account" : "Disable Account";
+            var approve_action_state = !Boolean(approved) ? 1 : 0;
+            var ahtml = `
+              <div class="dropdown-divider"></div>
+              <span class="dropdown-item" onclick="set_approved_state(`+approve_action_state+`)">
+                `+approve_action_string+`
+              </span>`;
+              document.getElementById("approve-section").innerHTML=ahtml;
+          }
 
         }
       }

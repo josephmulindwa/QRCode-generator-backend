@@ -295,10 +295,11 @@
         let res = await api_get("/project/"+to_state+"?name="+name);
         let datajs = await res.json();
         if (datajs['status']==="success"){
-          window.location.href = "my_projects.html";
+          alert(datajs["data"]);
         }else{
           alert(datajs['message']);
         }
+        window.location.href = "view_project.html";
       }
     }
 

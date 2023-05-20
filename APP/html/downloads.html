@@ -239,6 +239,7 @@
       }
 
       var perc = (progress/total)*100;
+      perc = perc.toFixed(2);
       var ihtml = `<h4 class="small font-weight-bold">Progress<span class="float-right">`+perc+`%</span></h4>`;
       ihtml += `<div class="progress mb-4">`;
       ihtml += `<div class="progress-bar bg-info" role="progressbar" style="width: `+perc+`%" aria-valuenow="`+perc+`" aria-valuemin="0" aria-valuemax="100"></div>`;
@@ -251,6 +252,7 @@
       document.getElementById("progress-div").innerHTML = ihtml;
     }
 
+    fetch_and_fill_progress();
     interval = setInterval(fetch_and_fill_progress, 5000);
    
     

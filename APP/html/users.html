@@ -228,6 +228,7 @@
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name() + " - Users";
     document.getElementById("sidebar-name").innerText = name;
+    var stored_permissions = window.localStorage.getItem("permissions");
 
     var get_data = function(){
         return ["ALL",0,20];
@@ -302,10 +303,10 @@
           var table_body = document.getElementById("table-body");
           table_body.innerHTML = rows;
         }
-
     }
-    request_data();
-
+    if(stored_permissions.includes("VIEW_USERS")){
+      request_data();
+    }
     // search feature
     async function request_data_by_search_text(){
       var search_bar = document.getElementById("search-bar");
