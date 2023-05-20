@@ -368,7 +368,7 @@
           mainform.csv_serial_length.value=data["csv_serial_length"];
           mainform.pre_string.value = data["pre_string"];
           mainform.pro_string.value = data["pro_string"];
-          mainform.configurations.value = "default_config"; //data["config_name"];
+          mainform.configurations.value = data["config_name"];
           window.localStorage.setItem("project-name", data["name"]);
 
           update_preview_section();

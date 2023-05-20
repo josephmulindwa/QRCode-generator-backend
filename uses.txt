@@ -5,7 +5,4 @@ sort projects by date
 
 -to-do
 -table-limit
--/fetch && fill correct configs by join in view_project
 -remove logs
--assert permissions
--project-list.show created_by
