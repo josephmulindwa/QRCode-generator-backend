@@ -291,8 +291,9 @@
 
     async function handle_state_change(to_state){
       let name = window.localStorage.getItem("project-name");
+      let creator = window.localStorage.getItem("project-creator");
       if (validate_string(name)){
-        let res = await api_get("/project/"+to_state+"?name="+name);
+        let res = await api_get("/project/"+to_state+"?name="+name+"&username="+creator);
         let datajs = await res.json();
         if (datajs['status']==="success"){
           alert(datajs["data"]);

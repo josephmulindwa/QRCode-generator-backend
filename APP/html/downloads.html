@@ -210,7 +210,8 @@
             return;
         }
         let projectname = window.localStorage.getItem("project-name");
-        var res = await api_get("/project/downloads?name="+projectname);
+        let creator = window.localStorage.getItem("project-creator");
+        var res = await api_get("/project/downloads?name="+projectname+"&username="+creator);
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
@@ -228,7 +229,8 @@
     async function fetch_and_fill_progress(){
       // performs one fetch and update cycle
       let projectname = window.localStorage.getItem("project-name");
-      let res = await api_get("/project/progress?name="+projectname);
+      let creator = window.localStorage.getItem("project-creator");
+      let res = await api_get("/project/progress?name="+projectname+"&creator="+creator);
       let datajs = await res.json();
       var progress=0;
       var total=1;

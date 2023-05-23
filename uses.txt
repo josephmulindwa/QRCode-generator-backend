@@ -3,5 +3,6 @@
 -admin-should be able to adjust any project; pause,cancel,resume,bill,state,complete,delete,downloads
 -table-limit
 -remove logs
-
+-session storage
+-attached listener at callback; listener dies
 
