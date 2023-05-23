@@ -241,6 +241,7 @@
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name()+" - My Projects";
     document.getElementById("sidebar-name").innerText = name;
+    window.localStorage.setItem("project-creator", "");
 
     var get_data = function(){
         return [0,20];

@@ -265,7 +265,7 @@
       var content="";
       for(var i=0; i<data.length; i++){
         var obj = data[i];
-        var id_core=obj["name"];
+        var id_core=obj["name"]+"::"+obj["creator"];
 
         var row = "<tr><td>"+obj["name"]+"</td>";
         row += "<td>"+obj["description"]+"</td>";
@@ -346,7 +346,7 @@
         return;
       }
       
-      var res = await api_get("/project/search?text="+text);
+      var res = await api_get("/project/search?text="+text+"&users=true");
       var datajs = await res.json();
       console.log("DATAJS :", datajs);
       if (datajs["status"]!=="success"){
@@ -363,9 +363,13 @@
       e = e || window.event;
       var src = e.target || e.srcElement;
       var _id = e.id;
-      let name = _id.split(".")[1];
-      console.log("project-name :", name);
+      let id_part = _id.split(".")[1];
+      let parts = id_part.split("::");
+      var name = parts[0];
+      var creator = parts[1];
+      console.log("project-name :", name, creator);
       window.localStorage.setItem("project-name", name);
+      window.localStorage.setItem("project-creator", creator);
       window.location.href = "view_project.html";
     }
     

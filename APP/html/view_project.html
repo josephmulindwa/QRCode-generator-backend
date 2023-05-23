@@ -357,8 +357,9 @@
 
     async function fill_from_data(){
       var name = window.localStorage.getItem("project-name");
+      var creator = window.localStorage.getItem("project-creator");
       if (validate_string(name)){
-        var res = await api_get("/project/get?name="+name);
+        var res = await api_get("/project/get?name="+name+"&username="+creator);
         var datajs = await res.json();
         console.log(datajs);
 
