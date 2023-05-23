@@ -1,8 +1,4 @@
 @param docs
-req->delete&files
 
-sort projects by date
-
--to-do
 -table-limit
 -remove logs

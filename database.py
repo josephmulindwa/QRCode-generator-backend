@@ -1,4 +1,5 @@
 import mysql.connector 
+# ---this file is abit obsolete
 
 class Database:
     connection=None

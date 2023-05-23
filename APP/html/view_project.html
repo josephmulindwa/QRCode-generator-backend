@@ -307,6 +307,7 @@
       var state_text=null;
       var callable=null;
       var cancel_text=null;
+      let permissions = window.localStorage.getItem("permissions");
       console.log("STATE :", current_state);
       if(current_state==="ACTIVE"){
         state_text="Pause";
@@ -317,14 +318,18 @@
         callable="resume";
         cancel_text="Cancel";
       }else if(current_state==="COMPLETE"){
-        let permissions = window.localStorage.getItem("permissions");
         var can_bill = permissions!==null && permissions.includes("BILL_PROJECTS");
         if (can_bill){
           state_text="Bill";
           callable="bill";
         }
       }else if(current_state==="CANCELLED"){
-        let permissions = window.localStorage.getItem("permissions");
+        var can_delete = permissions!==null && permissions.includes("DELETE_PROJECTS");
+        if (can_delete){
+          state_text="Delete";
+          callable="delete";
+        }
+      }else if(current_state==="BILLED"){
         var can_delete = permissions!==null && permissions.includes("DELETE_PROJECTS");
         if (can_delete){
           state_text="Delete";

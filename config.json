@@ -1,9 +1,0 @@
-{
-    "folder_batch":500,
-    "version":1,
-    "error_correction":"ERROR_CORRECT_M",
-    "box_size":4,
-    "border":1,
-    "fgcolor":"#000000",
-    "bgcolor":"#ffffff"
-}

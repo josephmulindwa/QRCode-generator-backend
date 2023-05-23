@@ -1,28 +1,13 @@
 import uvicorn
-from fastapi import FastAPI, status, Request
-from pydantic import BaseModel
-from fastapi.responses import Response, StreamingResponse
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from typing import Generator
 import os
-import apiutils
-import utils
-import threading
-import re
-import json
-import time
-import logging
-import authenticate
-from user import User
-from project import Project
-from configuration import Configuration
-from user_permission import UserPermission
+
+APP_FOLDER = "APP"
 
 app = FastAPI(title="main app")
 api_app = FastAPI(title="api app")
-
-apiutils.setup()
 
 origins = ['*']
 app.add_middleware(
@@ -35,7 +20,7 @@ app.add_middleware(
 
 html_app = FastAPI(name="html api")
 
-html_folder = os.path.join(apiutils.APP_FOLDER, "html")
+html_folder = os.path.join(APP_FOLDER, "html")
 app.mount("/api", api_app)
 app.mount("/", StaticFiles(directory=html_folder, html=True), name="html")
 
