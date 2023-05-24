@@ -339,7 +339,7 @@
       var src = e.target || e.srcElement;
 
       console.log("E :", e.id);
-      window.localStorage.setItem("config-name", e.id);
+      set_storage_item("config-name", e.id);
       window.location.href = "view_configuration.html";
     }
   </script>

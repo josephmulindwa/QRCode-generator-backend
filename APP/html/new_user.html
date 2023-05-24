@@ -166,7 +166,7 @@
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name()+" - Create User";
     document.getElementById("sidebar-name").innerText = name;
-    var stored_permissions = window.localStorage.getItem("permissions");
+    var stored_permissions = get_storage_item("permissions");
     if(!stored_permissions.includes("CREATE_USERS")){
       document.getElementById("content").style.display = "none";
     }

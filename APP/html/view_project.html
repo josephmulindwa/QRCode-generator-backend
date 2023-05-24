@@ -226,6 +226,7 @@
 
   <script>
     var name = get_active_name();
+    let interval = null;
     console.log("name :", name);
 
     // FILLING PAGE
@@ -272,7 +273,6 @@
 
       var res = await api_post("/project/preview_image", fdata);
       var data_js = await res.json();
-      console.log("IMAGE :", data_js);
       if(data_js["status"]==="success"){
         var data = data_js["data"];
         var b = "data:image/gif;base64,"+data;
@@ -282,25 +282,9 @@
       var res = await api_post("/project/preview_text", fdata);
       let datajs = await res.json();
       if(datajs["status"]==="success"){
-        console.log("RESPONSE :", datajs);
         var data = datajs["data"];
         var text = "SAMPLES : " + data["start"] + " | " + data["end"];
         document.getElementById("preview-text").innerText = text;
-      }
-    }
-
-    async function handle_state_change(to_state){
-      let name = window.localStorage.getItem("project-name");
-      let creator = window.localStorage.getItem("project-creator");
-      if (validate_string(name)){
-        let res = await api_get("/project/"+to_state+"?name="+name+"&username="+creator);
-        let datajs = await res.json();
-        if (datajs['status']==="success"){
-          alert(datajs["data"]);
-        }else{
-          alert(datajs['message']);
-        }
-        window.location.href = "view_project.html";
       }
     }
 
@@ -308,7 +292,7 @@
       var state_text=null;
       var callable=null;
       var cancel_text=null;
-      let permissions = window.localStorage.getItem("permissions");
+      let permissions = get_storage_item("permissions");
       console.log("STATE :", current_state);
       if(current_state==="ACTIVE"){
         state_text="Pause";
@@ -357,15 +341,15 @@
     }
 
     async function fill_from_data(){
-      var name = window.localStorage.getItem("project-name");
-      var creator = window.localStorage.getItem("project-creator");
+      var name = get_storage_item("project-name");
+      var creator = get_storage_item("project-creator");
       if (validate_string(name)){
         var res = await api_get("/project/get?name="+name+"&username="+creator);
         var datajs = await res.json();
         console.log(datajs);
 
         if (datajs["status"]==="success"){
-          data = datajs["data"];
+          let data = datajs["data"];
           mainform.name.value=data["name"];
           mainform.state.value=data["state"];
           mainform.startvalue.value=data["start_value"];
@@ -376,16 +360,55 @@
           mainform.pre_string.value = data["pre_string"];
           mainform.pro_string.value = data["pro_string"];
           mainform.configurations.value = data["config_name"];
-          window.localStorage.setItem("project-name", data["name"]);
+          set_storage_item("project-name", data["name"]);
+
+          let state_bgcolor = "#d3d3d3";
+          if (data["state"]==="ACTIVE"){
+            state_bgcolor = "#add8e6";
+          }else if (data["state"]==="PAUSED"){
+            state_bgcolor = "#fcd299";
+          }else if (data["state"]==="CANCELLED"){
+            state_bgcolor = "#ff726f";
+          }if (data["state"]==="COMPLETE"){
+            state_bgcolor = "#90ee90";
+            if(interval!==null){
+              clearInterval(interval);
+            }
+          }
+          console.log("State :", state_bgcolor);
+          mainform.state.style.backgroundColor = state_bgcolor;
 
           update_preview_section();
           set_state_change_button_content(data["state"]);
         }else{
+          if(interval!==null){
+            clearInterval(interval)
+          }
           alert(datajs["message"]);
         }
       }
     }
+
+    async function handle_state_change(_state){
+      // set an updater
+      let name = get_storage_item("project-name");
+      let creator = get_storage_item("project-creator");
+      if (validate_string(name)){
+        let res = await api_get("/project/"+_state+"?name="+name+"&username="+creator);
+        if(_state!=="resume"){
+          let datajs = await res.json();
+          if (datajs['status']==="success"){
+            alert(datajs["data"]);
+          }else{
+            alert(datajs['message']);
+          }
+        }
+        window.location.href = "view_project.html";
+      }
+    }
+
     fill_from_data();
+    interval = setInterval(fill_from_data, 3000);
     
   </script>
 

@@ -170,7 +170,7 @@
 
     async function send_data(){
       var checked_permission_codes = get_checked_permissions();
-      var username = window.localStorage.getItem("user-name");
+      var username = get_storage_item("user-name");
       console.log("username :"+username);
 
       var fdata = new FormData();
@@ -190,12 +190,12 @@
     }
 
     async function fill_from_data(){
-      var stored_permissions = window.localStorage.getItem("permissions");
+      var stored_permissions = get_storage_item("permissions");
       if (!stored_permissions.includes("VIEW_U_PERMISSIONS") && !stored_permissions.includes("VIEW_M_PERMISSIONS")){
         return;
       }
 
-      var username = window.localStorage.getItem("user-name");
+      var username = get_storage_item("user-name");
       console.log("--username :"+username);
       if (validate_string(username)){
         // adjust page

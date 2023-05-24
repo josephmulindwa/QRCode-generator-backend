@@ -137,7 +137,7 @@
 
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name() + " - Register";
-    document.getElementById("sidebar-name").innerText = name;
+    //document.getElementById("sidebar-name").innerText = name;
 
     var get_form_data = function(){
         var mainform = document.getElementById("mainform");
@@ -194,7 +194,7 @@
         fdata.append("password",password);
         fdata.append("created_by","superuser");
 
-        var res = await api_post("/user/add?register=true", fdata);
+        var res = await api_post("/user/register", fdata);
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){

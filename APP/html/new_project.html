@@ -209,13 +209,13 @@
   <script src="js/utils.js"></script>
 
   <script>
-    var name = get_active_name();
-    console.log("name :", name);
+    var active_name = get_active_name();
+    console.log("name :", active_name);
 
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name()+" - New Project";
-    document.getElementById("sidebar-name").innerText = name;
-    var stored_permissions = window.localStorage.getItem("permissions");
+    document.getElementById("sidebar-name").innerText = active_name;
+    var stored_permissions = get_storage_item("permissions");
     if(!stored_permissions.includes("CREATE_PROJECTS")){
       document.getElementById("content").style.display = "none";
     }
@@ -294,6 +294,20 @@
         fdata.append("config_name",config_name);
 
         alert("Please wait...");
+        // set an updater
+        setTimeout(async ()=>{
+          var res = await api_get("/project/get?name="+name);
+          var datajs = await res.json();
+          console.log("DATAJS[re] :", datajs);
+          if (datajs["status"]==="success"){
+            let object = datajs["data"];
+            if (object["state"]==="ACTIVE"){
+              alert("Project started successfully!");
+              window.location.href = "my_projects.html";
+            }
+          }
+        }, 3000);
+
         var res = await api_post("/project/add", fdata);
         var datajs = await res.json();
         console.log("DATAJS[ADD] :", datajs);
@@ -301,7 +315,7 @@
             alert(datajs["message"]);
         }else{
             alert(datajs["data"]);
-            //window.location.href = "my_projects.html"
+            window.location.href = "my_projects.html"
         }
     }
 

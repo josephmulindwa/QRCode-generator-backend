@@ -237,7 +237,7 @@
     document.getElementById("sidebar-name").innerText = name;
 
     function fill_from_permissions(){
-      var permissions = window.localStorage.getItem("permissions");
+      var permissions = get_storage_item("permissions");
       document.getElementById("user-count-card").style.display = permissions!==null && permissions.includes("VIEW_USERS") ? "initial":"none";
     }
     fill_from_permissions();
@@ -248,8 +248,6 @@
       var count=0;
       if (datajs["status"]=="success"){
         count = datajs["data"]
-      }else{
-        window.location.href="login.html";
       }
       document.getElementById("user-count").innerText=count;
     }
@@ -260,6 +258,10 @@
       var count=0;
       if (datajs["status"]=="success"){
         count = datajs["data"]
+      }else{
+        if (datajs["message"]==="Invalid token!"){
+          window.location.href="login.html";
+        }
       }
       document.getElementById(target_id).innerText=count;
     }

@@ -85,7 +85,7 @@
   <script src="js/utils.js"></script>
 
   <script>
-    window.localStorage.clear();
+    clear_storage();
     
     function get_form_data(){
       var mainform = document.getElementById('mainform');
@@ -120,13 +120,13 @@
       console.log(datajs)
       if (datajs["status"]==="success"){
         var data = datajs["data"];
-        window.localStorage.setItem("token", data['token']);
-        window.localStorage.setItem("username", data["username"]);
-        window.localStorage.setItem("name", data["name"]);
+        set_storage_item("token", data['token']);
+        set_storage_item("username", data["username"]);
+        set_storage_item("name", data["name"]);
         
         await get_user_permissions();
 
-        if(window.localStorage.getItem("permissions")===null){
+        if(get_storage_item("permissions")===null){
           alert("not set!");
           return;
         }

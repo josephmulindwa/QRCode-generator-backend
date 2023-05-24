@@ -82,7 +82,7 @@
           <!-- Table -->
           <div class="card shadow mb-4">
             <div class="card-header py-3">
-                <div class="btn btn-primary">
+                <div onclick="request_downloads()" class="btn btn-primary">
                   All Downloads
                 </div>
                 
@@ -167,6 +167,10 @@
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name()+" - Downloads";
     document.getElementById("sidebar-name").innerText = name;
+    
+    let interval = null;
+    let projectname = get_storage_item("project-name");
+    let creator = get_storage_item("project-creator");
 
     var get_data = function(){
         return [0,20];
@@ -191,7 +195,6 @@
       for(var i=0; i<data.length; i++){
         var obj = data[i];
         var id_core=obj;
-        let projectname = window.localStorage.getItem("project-name");
         var link = get_api_uri()+"/project/download?name="+projectname+"&file="+obj;
         console.log(link);
         var row = `<tr>`;
@@ -209,8 +212,6 @@
             alert(msg);
             return;
         }
-        let projectname = window.localStorage.getItem("project-name");
-        let creator = window.localStorage.getItem("project-creator");
         var res = await api_get("/project/downloads?name="+projectname+"&username="+creator);
         var datajs = await res.json();
         console.log("DATAJS :", datajs);
@@ -225,11 +226,8 @@
       }
     request_downloads();
 
-    let interval = null;
     async function fetch_and_fill_progress(){
       // performs one fetch and update cycle
-      let projectname = window.localStorage.getItem("project-name");
-      let creator = window.localStorage.getItem("project-creator");
       let res = await api_get("/project/progress?name="+projectname+"&creator="+creator);
       let datajs = await res.json();
       var progress=0;
@@ -255,7 +253,7 @@
     }
 
     fetch_and_fill_progress();
-    interval = setInterval(fetch_and_fill_progress, 5000);
+    interval = setInterval(fetch_and_fill_progress, 4000);
    
     
   </script>

@@ -280,7 +280,7 @@
     }
 
     async function fill_from_data(){
-      var name = window.localStorage.getItem("config-name");
+      var name = get_storage_item("config-name");
       if (validate_string(name)){
         var res = await api_get("/configuration/get?name="+name);
         var datajs = await res.json();

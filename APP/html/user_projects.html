@@ -241,7 +241,7 @@
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name() + " - Projects";
     document.getElementById("sidebar-name").innerText = name;
-    var stored_permissions = window.localStorage.getItem("permissions");
+    var stored_permissions = get_storage_item("permissions");
 
     var get_data = function(){
         return [0,20];
@@ -368,8 +368,8 @@
       var name = parts[0];
       var creator = parts[1];
       console.log("project-name :", name, creator);
-      window.localStorage.setItem("project-name", name);
-      window.localStorage.setItem("project-creator", creator);
+      set_storage_item("project-name", name);
+      set_storage_item("project-creator", creator);
       window.location.href = "view_project.html";
     }
     

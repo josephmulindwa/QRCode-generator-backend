@@ -228,7 +228,7 @@
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name() + " - Users";
     document.getElementById("sidebar-name").innerText = name;
-    var stored_permissions = window.localStorage.getItem("permissions");
+    var stored_permissions = get_storage_item("permissions");
 
     var get_data = function(){
         return ["ALL",0,20];
@@ -333,7 +333,7 @@
     async function prepare_and_load_profile_view(e){
       e = e || window.event;
       var src = e.target || e.srcElement;
-      window.localStorage.setItem("user-name", e.id);
+      set_storage_item("user-name", e.id);
       window.location.href = "profile.html";
     }
   </script>

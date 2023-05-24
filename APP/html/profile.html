@@ -247,12 +247,12 @@
     }
 
     async function fill_from_data(){
-      var stored_permissions = window.localStorage.getItem("permissions");
+      var stored_permissions = get_storage_item("permissions");
       if(!stored_permissions.includes("EDIT_M_PROFILE") && !stored_permissions.includes("EDIT_U_PROFILES")){
         document.getElementById("save-button").style.display = "none";
       }
 
-      var username = window.localStorage.getItem("user-name");
+      var username = get_storage_item("user-name");
       if (validate_string(username)){
         // fill page heading
         // own:grant->view, own->view->view, other:grant->edit, other->view
@@ -297,7 +297,7 @@
     fill_from_data();
 
     async function set_approved_state(approve){
-      var username = window.localStorage.getItem("user-name");
+      var username = get_storage_item("user-name");
       if (validate_string(username)){
         let res = await api_get("/user/approve?username="+username+"&approve="+approve);
         let datajs = await res.json();

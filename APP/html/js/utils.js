@@ -38,11 +38,23 @@ function get_app_name(){
     return "QRGEN";
 }
 
+function set_storage_item(key, val){
+    sessionStorage.setItem(key, val);
+}
+
+function get_storage_item(key){
+    return sessionStorage.getItem(key);
+}
+
+function clear_storage(){
+    sessionStorage.clear();
+}
+
 async function api_post(url, data){
     // posts and returns raw response
     var base_url = get_api_uri();
     var url=base_url+url;
-    let token = window.localStorage.getItem("token");
+    let token = get_storage_item("token");
 
     try{
         let response = fetch(url, 
@@ -63,7 +75,7 @@ async function api_get(url){
     var base_url = get_api_uri();
     var url=base_url+url;
     console.log("GET :", url);
-    let token = window.localStorage.getItem("token");
+    let token = get_storage_item("token");
 
     try{
         return fetch(url, {
@@ -76,7 +88,7 @@ async function api_get(url){
 }
 
 function get_active_username(){
-    let username = window.localStorage.getItem("username");
+    let username = get_storage_item("username");
     console.log("@active_username :", username);
     if (!validate_string(username)){
         return "";
@@ -85,7 +97,7 @@ function get_active_username(){
 }
 
 function get_active_name(){
-    let name = window.localStorage.getItem("name");
+    let name = get_storage_item("name");
     if (!validate_string(name)){
         return "";
     }
@@ -94,7 +106,7 @@ function get_active_name(){
 
 function go_to_profile(){
     var username = get_active_username();
-    window.localStorage.setItem("user-name", username);
+    set_storage_item("user-name", username);
     window.location.href = "profile.html";
     return true;
 }
@@ -106,7 +118,7 @@ async function get_user_permissions(){
         let datajs = await res.json();
         if (datajs["status"]==="success"){
             var permissions = JSON.stringify(datajs["data"]);
-            window.localStorage.setItem("permissions", permissions);
+            set_storage_item("permissions", permissions);
             return permissions;
         }
     }
