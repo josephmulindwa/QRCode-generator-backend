@@ -1,3 +1,7 @@
+function get_api_uri(){
+    return "http://localhost/qrcode/index.php";
+}
+
 async function test_url(url){
     // checks if url is collectable
     try{
@@ -30,9 +34,6 @@ function detect_access_uri(){
     return final;
 }
 
-function get_api_uri(){
-    return "http://localhost/qrcode/index.php";
-}
 
 function get_app_name(){
     return "QRGEN";
