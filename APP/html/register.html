@@ -133,7 +133,6 @@
 
   <script>
     var name = get_active_name();
-    console.log("name :", name);
 
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name() + " - Register";
@@ -196,7 +195,6 @@
 
         var res = await api_post("/user/register", fdata);
         var datajs = await res.json();
-        console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
             alert(datajs["message"]);
         }else{

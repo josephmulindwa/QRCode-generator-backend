@@ -17,6 +17,8 @@
 
   <!-- Custom styles for this template-->
   <link href="css/sb-admin-2.min.css" rel="stylesheet">
+  <link href="css/sb-admin-2-pagination.css" rel="stylesheet">
+
   <style>
   .menu-nav {
        
@@ -160,6 +162,17 @@
                   <tbody id="table-body"></tbody>
                 </table>
               </div>
+
+              <div>
+                <ul class="pagination" role="menubar" aria-label="Pagination">
+                  <!-- <li><a href=""><span>First</span></a></li> -->
+                  <li><a onclick="request_prev_batch()"><span>Previous</span></a></li>
+                  <li><a href="" id="page-number">1</a></li>
+                  <li><a onclick="request_next_batch()"><span>Next</span></a></li>
+                  <!-- <li><a href=""><span>Last</span></a></li> -->
+                </ul>
+              </div>
+
             </div>
           </div>
 
@@ -224,33 +237,18 @@
   <script src="js/utils.js"></script>
 
   <script>
+    let active_link = "/configuration/list?";
+    let active_start = "config-list-start";
     var name = get_active_name();
-    console.log("name :", name);
 
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name()+" - Configurations";
     document.getElementById("sidebar-name").innerText = name;
 
-    var get_data = function(){
+    var get_page = function(){
         return ["ALL",0,20];
     }
 
-    function validate_data(){
-        var qdata = get_data();
-        var category=qdata[0];
-        var start=qdata[1];
-        var limit=qdata[2];
-
-        var msg = null;
-        if(!validate_string(qdata)){
-            msg = "Category not set correctly";
-        }else if(start<0){
-            msg = "Start Value not set correctly";
-        }else if(limit<0){
-            msg = "Limit not set correctly";
-        }
-        return msg;
-    }
 
     function table_from_data(data){
       var content="";
@@ -272,7 +270,7 @@
               <div class="three-dots"></div>
               <div class="dropdown">
                 <div id='`+id_core+`' onclick="prepare_and_load_config_view(this)" class="mr-2 ml-2 text-gray-400">
-                  <span>View</span>
+                  <a>View</a>
                 </div>
               </div>
             </div>
@@ -285,63 +283,105 @@
       return content;
     }
 
-    async function request_data(){
-        var msg = validate_data();
-        if (msg!==null){
-            alert(msg);
-            return;
+    function get_current_start(){
+      start = get_storage_item(active_start);
+      if(start===null || start===undefined){
+        start=0;
+        set_storage_item(active_start, start);
+      }
+      return parseInt(start);
+    }
+
+    function update_page_number(){
+      var start = get_current_start();
+      var limit = get_page_limit();
+      var page_number = parseInt(start/limit)+1;
+      document.getElementById("page-number").innerText=page_number;
+    }
+
+    async function request_data(link, reset, update_table_on_fail){
+        var start=get_current_start();
+        if (reset){
+          start=0;
+          set_storage_item(active_start, start);
         }
+        var limit=get_page_limit();
+        link = link+"start="+start+"&limit="+limit;
 
-        var qdata = get_data();
-        var category=qdata[0];
-        var start=qdata[1];
-        var limit=qdata[2];
-
-        var res = await api_get("/configuration/list");
+        var res = await api_get(link);
         var datajs = await res.json();
-        console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
           alert(datajs["message"]);
+          return 0;
         }else{
           var projects = datajs["data"];
+          if (projects.length==0 && !update_table_on_fail){
+            return 0;
+          }
           var rows = table_from_data(projects);
           var table_body = document.getElementById("table-body");
           table_body.innerHTML = rows;
+          return projects.length;
         }
+        return 0;
      }
-     request_data();
 
      // search feature
     async function request_data_by_search_text(){
       var search_bar = document.getElementById("search-bar");
       var text = search_bar.value;
-      console.log("TEXT:", text);
       if (!validate_string(text)){
-        request_data();
+        active_link ="/configuration/list?";
+        active_start = "config-list-start";
+        request_data(active_link, true, true);
         return;
       }
-      
-      var res = await api_get("/configurations/search/"+text);
-      var datajs = await res.json();
-      console.log("DATAJS :", datajs);
-      if (datajs["status"]!=="success"){
-        alert(datajs["message"]);
-      }else{
-        var users = datajs["data"];
-        var rows = table_from_data(users);
-        var table_body = document.getElementById("table-body");
-        table_body.innerHTML = rows;
-      }
+      active_link ="/configuration/search?text="+text+"&";
+      active_start = "config-search-start";
+      await request_data(active_link, true, true);
     }
 
     async function prepare_and_load_config_view(e){
       e = e || window.event;
       var src = e.target || e.srcElement;
 
-      console.log("E :", e.id);
       set_storage_item("config-name", e.id);
       window.location.href = "view_configuration.html";
     }
+
+    async function request_prev_batch(){
+      // get current start
+      var start = get_current_start();
+      var limit = get_page_limit();
+      // add limit
+      start = Math.max(0, start - limit);
+      link = active_link+"start="+start+"&limit="+limit;
+      var count = await request_data(link, false, false);
+      if (count){
+        // update page number and start
+        set_storage_item(active_start, start);
+        update_page_number()
+      }
+      return false;
+    }
+
+    async function request_next_batch(){
+      // get current start
+      var start = get_current_start();
+      var limit = get_page_limit();
+      // add limit
+      start = start + limit;
+      link = active_link+"start="+start+"&limit="+limit;
+      var count = await request_data(link, false, false);
+      if (count){
+        // update page number and start
+        set_storage_item(active_start, start);
+        update_page_number()
+      }
+      return false;
+    }
+
+    request_data(active_link, true, true);
   </script>
 
 </body>

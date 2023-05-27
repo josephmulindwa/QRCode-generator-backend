@@ -210,7 +210,6 @@
 
   <script>
     var active_name = get_active_name();
-    console.log("name :", active_name);
 
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name()+" - New Project";
@@ -298,7 +297,6 @@
         setTimeout(async ()=>{
           var res = await api_get("/project/get?name="+name);
           var datajs = await res.json();
-          console.log("DATAJS[re] :", datajs);
           if (datajs["status"]==="success"){
             let object = datajs["data"];
             if (object["state"]==="ACTIVE"){
@@ -310,7 +308,6 @@
 
         var res = await api_post("/project/add", fdata);
         var datajs = await res.json();
-        console.log("DATAJS[ADD] :", datajs);
         if (datajs["status"]!=="success"){
             alert(datajs["message"]);
         }else{
@@ -375,7 +372,6 @@
       var res = await api_post("/project/preview_text", fdata);
       let datajs = await res.json();
       if(datajs["status"]==="success"){
-        console.log("RESPONSE :", datajs);
         var data = datajs["data"];
         var text = "SAMPLES : " + data["start"] + " | " + data["end"];
         document.getElementById("preview-text").innerText = text;

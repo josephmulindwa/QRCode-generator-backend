@@ -194,7 +194,6 @@
 
   <script>
     var name = get_active_name();
-    console.log("name :", name);
 
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name() + " - Configuration";
@@ -284,7 +283,6 @@
       if (validate_string(name)){
         var res = await api_get("/configuration/get?name="+name);
         var datajs = await res.json();
-        console.log(datajs);
 
         if (datajs["status"]==="success"){
           data = datajs["data"];

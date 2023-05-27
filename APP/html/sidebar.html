@@ -4,7 +4,7 @@
     <div class="sidebar-brand-icon rotate-n-15">
       <i class="fas fa-laugh-wink"></i>
     </div>
-    <div class="sidebar-brand-text mx-3">QRGEN</div>
+    <div class="sidebar-brand-text mx-3" id="sidebar-title-text"></div>
   </a>
 
   <!-- Divider -->
@@ -95,10 +95,11 @@
 
   <script src="js/utils.js"></script>
   <script>
+
+    document.getElementById("sidebar-title-text").innerText = get_app_name();
     
     function fill_from_permissions(){
       var permissions = get_storage_item("permissions");
-      console.log("@PERM :", permissions);
 
       // new project section
       document.getElementById("new-project-section").style.display = permissions!==null && permissions.includes("CREATE_PROJECTS") ? "initial":"none";
@@ -108,5 +109,6 @@
       document.getElementById("new-user-section").style.display = permissions!==null && permissions.includes("CREATE_USERS") ? "initial":"none";
       document.getElementById("view-users-section").style.display = permissions!==null && permissions.includes("VIEW_USERS") ? "initial":"none";
     }
+    
     fill_from_permissions();
   </script>

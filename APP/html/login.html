@@ -117,7 +117,6 @@
 
       var res = await api_post("/user/login", fdata);
       var datajs = await res.json();
-      console.log(datajs)
       if (datajs["status"]==="success"){
         var data = datajs["data"];
         set_storage_item("token", data['token']);

@@ -1,5 +1,5 @@
 function get_api_uri(){
-    return "http://localhost/qrcode/index.php";
+    return "http://localhost/qrcode-generator/index.php";
 }
 
 async function test_url(url){
@@ -124,4 +124,8 @@ async function get_user_permissions(){
         }
     }
     return [];
+}
+
+function get_page_limit(){
+    return 15; //.env
 }

@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
+import logging
 
 APP_FOLDER = "APP"
 
@@ -30,6 +31,7 @@ async def stop_server(req : Request):
     pass
 
 if __name__ == "__main__":
-    #uvicorn_access = logging.getLogger("uvicorn.access")
-    #uvicorn_access.disabled=True
-    uvicorn.run(app, host='0.0.0.0', port=8000)
+    uvicorn_access = logging.getLogger("uvicorn.access")
+    uvicorn_access.disabled=True
+    # uvicorn.run("main:app", host='0.0.0.0', port=8000, workers=2)  # use this if you want server to run without stopping automatically
+    uvicorn.run(app, host='0.0.0.0', port=8000) # standard run, will stop after some idle time

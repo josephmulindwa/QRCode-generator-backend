@@ -17,6 +17,10 @@
 
   <!-- Custom styles for this template-->
   <link href="css/sb-admin-2.min.css" rel="stylesheet">
+  <link href="css/sb-admin-2-pagination.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
   <style>
     .menu-nav {
          
@@ -149,7 +153,8 @@
                   <span class="dropdown-item">Active Projects</span>
                   <span class="dropdown-item">Billed Projects</span>
                   <span class="dropdown-item">Complete Projects</span>
-                  <span class="dropdown-item">Inactive Projects</span>
+                  <span class="dropdown-item">Paused Projects</span>
+                  <span class="dropdown-item">Cancelled Projects</span>
                 </div>
             </div>
             
@@ -160,7 +165,6 @@
                     <tr>
                       <th>Name</th>
                       <th>Description</th>
-                      <th>Created by</th>
                       <th>Start</th>
                       <th>Total</th>
                       <th>Start date</th>
@@ -171,6 +175,17 @@
                   <tbody id="table-body"></tbody>
                 </table>
               </div>
+
+              <div>
+                <ul class="pagination" role="menubar" aria-label="Pagination">
+                  <!-- <li><a href=""><span>First</span></a></li> -->
+                  <li><a onclick="request_prev_batch()"><span>Previous</span></a></li>
+                  <li><a href="" id="page-number">1</a></li>
+                  <li><a onclick="request_next_batch()"><span>Next</span></a></li>
+                  <!-- <li><a href=""><span>Last</span></a></li> -->
+                </ul>
+              </div>
+
             </div>
           </div>
 
@@ -235,31 +250,15 @@
   <script src="js/utils.js"></script>
 
   <script>
+    let active_link = "/project/list?";
+    let active_start = "mproject-list-start";
+    let category = "ALL";
     var name = get_active_name();
-    console.log("name :", name);
 
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name()+" - My Projects";
     document.getElementById("sidebar-name").innerText = name;
     set_storage_item("project-creator", "");
-
-    var get_data = function(){
-        return [0,20];
-    }
-
-    function validate_data(){
-        var qdata = get_data();
-        var start=qdata[0];
-        var limit=qdata[1];
-
-        var msg = null;
-        if(start<0){
-            msg = "Start Value not set correctly";
-        }else if(limit<0){
-            msg = "Limit not set correctly";
-        }
-        return msg;
-    }
 
     function table_from_data(data){
       var content="";
@@ -277,7 +276,6 @@
 
         var row = "<tr><td>"+obj["name"]+"</td>";
         row += "<td>"+obj["description"]+"</td>";
-        row += "<td>"+obj["creator"]+"</td>";
         row += "<td>"+obj["start_value"]+"</td>";
         row += "<td>"+obj["total"]+"</td>";
         row += "<td>"+obj["created_on"]+"</td>";
@@ -289,7 +287,7 @@
               <div class="three-dots"></div>
               <div class="dropdown">
                 <div id='view.`+id_core+`' onclick="prepare_and_load_view(this)" class="mr-2 ml-2 text-gray-400">
-                  <span>View</span>
+                  <a>View</a>
                 </div>
               </div>
             </div>
@@ -302,66 +300,79 @@
       return content;
     }
 
-    async function request_data_by_category(category){
-        var msg = validate_data();
-        if (msg!==null){
-            alert(msg);
-            return;
+    function get_current_start(){
+      start = get_storage_item(active_start);
+      if(start===null || start===undefined){
+        start=0;
+        set_storage_item(active_start, start);
+      }
+      return parseInt(start);
+    }
+
+    function update_page_number(){
+      var start = get_current_start();
+      var limit = get_page_limit();
+      var page_number = parseInt(start/limit)+1;
+      document.getElementById("page-number").innerText=page_number;
+    }
+
+    async function request_data(link, reset, update_table_on_fail){
+
+        var start=get_current_start();
+        if (reset){
+          start=0;
+          set_storage_item(active_start, start);
         }
-
-        var qdata = get_data();
-        var start=qdata[1];
-        var limit=qdata[2];
-
-        var res = await api_get("/project/list?category="+category);
+        var limit=get_page_limit();
+        if(!link.includes("start")){
+          link = link+"start="+start+"&limit="+limit;
+        }
+        link = link+"&category="+category;
+        var res = await api_get(link);
         var datajs = await res.json();
-        console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
           alert(datajs["message"]);
+          return 0;
         }else{
           var projects = datajs["data"];
+          if (projects.length==0 && !update_table_on_fail){
+            return 0;
+          }
           var rows = table_from_data(projects);
           var table_body = document.getElementById("table-body");
           table_body.innerHTML = rows;
+          return projects.length;
         }
+        return 0;
       }
 
     //fill table
-    function on_click_category_item(category_text){
+    async function on_click_category_item(category_text){
       var spl = category_text.split(" ");
-      var category = spl[0].toUpperCase();
-      console.log("Category :", category);
-      request_data_by_category(category);
-
+      category = spl[0].toUpperCase();
+      active_link = "/project/list?";
+      active_start = "mproject-list-start";
+      set_storage_item(active_start, 0);
+      await request_data(active_link, category, true, true);
+      update_page_number();
     }
-    $('.dropdown-item').on('click', 
-    function(){
-      $('#dropdownMenuButton').text($(this).text());
-      on_click_category_item($(this).text());
-    })
-    request_data_by_category("ALL");
 
     // search functionality
     async function request_data_by_search_text(){
       var search_bar = document.getElementById("search-bar");
       var text = search_bar.value;
-      console.log("TEXT:", text);
       if (!validate_string(text)){
-        request_data_by_category("ALL");
+        active_link ="/project/list?";
+        active_start = "mproject-list-start";
+        request_data(active_link, "ALL", true, true);
         return;
       }
-      
-      var res = await api_get("/project/search?text="+text);
-      var datajs = await res.json();
-      console.log("DATAJS :", datajs);
-      if (datajs["status"]!=="success"){
-        alert(datajs["message"]);
-      }else{
-        var requests = datajs["data"];
-        var rows = table_from_data(requests);
-        var table_body = document.getElementById("table-body");
-        table_body.innerHTML = rows;
-      }
+
+      active_link ="/project/search?text="+text+"&";
+      active_start = "mproject-search-start";
+      set_storage_item(active_start, 0);
+      await request_data(active_link, true, true);
+      update_page_number();
     }
 
     async function prepare_and_load_view(e){
@@ -369,10 +380,48 @@
       var src = e.target || e.srcElement;
       var _id = e.id;
       let name = _id.split(".")[1];
-      console.log("project-name :", name);
       set_storage_item("project-name", name);
       window.location.href = "view_project.html";
     }
+
+    async function request_prev_batch(){
+      // get current start
+      var start = get_current_start();
+      var limit = get_page_limit();
+      // add limit
+      start = Math.max(0, start - limit);
+      link = active_link+"start="+start+"&limit="+limit;
+      var count = await request_data(link, false, false);
+      if (count){
+        // update page number and start
+        set_storage_item(active_start, start);
+        update_page_number()
+      }
+      return false;
+    }
+
+    async function request_next_batch(){
+      // get current start
+      var start = get_current_start();
+      var limit = get_page_limit();
+      // add limit
+      start = start + limit;
+      link = active_link+"start="+start+"&limit="+limit;
+      var count = await request_data(link, false, false);
+      if (count){
+        // update page number and start
+        set_storage_item(active_start, start);
+        update_page_number()
+      }
+      return false;
+    }
+
+    $('.dropdown-item').on('click', 
+    function(){
+      $('#dropdownMenuButton').text($(this).text());
+      on_click_category_item($(this).text());
+    })
+    request_data(active_link, true, true);
     
   </script>
 

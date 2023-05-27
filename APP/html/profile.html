@@ -175,7 +175,6 @@
 
   <script>
     var name = get_active_name();
-    console.log("name :", name);
 
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name()+" - Profile";
@@ -237,7 +236,6 @@
 
         var res = await api_post("/user/edit", fdata);
         var datajs = await res.json();
-        console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
             alert(datajs["message"]);
         }else{
@@ -269,7 +267,6 @@
         // fill form
         var res = await api_get("/user/get?username="+username);
         var datajs = await res.json();
-        console.log(datajs);
 
         if (datajs["status"]==="success"){
           data = datajs["data"];
@@ -279,7 +276,7 @@
           mainform.password.value=data["password"];
           mainform.repassword.value=data["password"];
 
-          if(stored_permissions.includes("APPROVE_USERS")){
+          if(stored_permissions.includes("APPROVE_USERS") && !username===get_active_username()){
             let approved = data["approved"];
             var approve_action_string = !Boolean(approved) ? "Approve Account" : "Disable Account";
             var approve_action_state = !Boolean(approved) ? 1 : 0;

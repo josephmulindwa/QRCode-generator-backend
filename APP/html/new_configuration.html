@@ -115,13 +115,13 @@
                 <div class="form-group row">
                     <div class="col-sm-2">Fore Color Hex</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                        <input type="text" class="form-control form-control-user" id="fgcolor">
+                        <input type="text" class="form-control form-control-user" id="fgcolor" placeholder="#000000">
                     </div>
                 </div>
                 <div class="form-group row">
                     <div class="col-sm-2">Back Color Hex</div>
                     <div class="col-sm-6 mb-3 mb-sm-0">
-                        <input type="text" class="form-control form-control-user" id="bgcolor">
+                        <input type="text" class="form-control form-control-user" id="bgcolor" placeholder="#ffffff">
                     </div>
                 </div>
 
@@ -197,7 +197,6 @@
 
   <script>
     var name = get_active_name();
-    console.log("name :", name);
 
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name()+" - New Configuration";
@@ -238,11 +237,11 @@
         }else if(!validate_string(box_size)){
             msg = "Box size not set correctly";
         }else if(!validate_string(border)){
-            msg = "Border name not set correctly";
+            msg = "Border not set correctly";
         }else if(!validate_string(fgcolor)){
-            msg = "Fore color name not set correctly";
+            msg = "Fore color not set correctly";
         }else if(!validate_string(bgcolor)){
-            msg = "Back color name not set correctly";
+            msg = "Back color not set correctly";
         }
         return msg;
     }
@@ -275,7 +274,6 @@
 
         var res = await api_post("/configuration/add", fdata);
         var datajs = await res.json();
-        console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
             alert(datajs["message"]);
         }else{

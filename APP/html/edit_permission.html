@@ -145,7 +145,6 @@
 
   <script>
     var name = get_active_name();
-    console.log("name :", name);
 
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name()+" - Edit Permissions";
@@ -171,16 +170,13 @@
     async function send_data(){
       var checked_permission_codes = get_checked_permissions();
       var username = get_storage_item("user-name");
-      console.log("username :"+username);
 
       var fdata = new FormData();
       fdata.append("username",username);
       fdata.append("permissions",JSON.stringify(checked_permission_codes));
-      console.log("FORM :", ...fdata);
 
         var res = await api_post("/permission/set", fdata);
         var datajs = await res.json();
-        console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
             alert(datajs["message"]);
         }else{
@@ -196,7 +192,6 @@
       }
 
       var username = get_storage_item("user-name");
-      console.log("--username :"+username);
       if (validate_string(username)){
         // adjust page
         var disabled_string="";
@@ -211,8 +206,6 @@
         // fill permissions
         let permission_get_response = await api_get("/permission/list");
         var datajs = await permission_get_response.json();
-
-        console.log("DATAJS :", datajs);
 
         if (datajs["status"]==="success"){
           var all_permissions = datajs["data"];

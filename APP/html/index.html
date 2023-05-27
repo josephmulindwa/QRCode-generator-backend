@@ -18,6 +18,8 @@
   <!-- Custom styles for this template-->
   <link href="css/sb-admin-2.min.css" rel="stylesheet">
 
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
 </head>
 
 <body id="page-top">
@@ -123,7 +125,7 @@
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Projects (Total)</div>
+                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">My Projects (Total)</div>
                       <div class="h5 mb-0 font-weight-bold text-gray-800" id="project-count-all">0</div>
                     </div>
                     <div class="col-auto">
@@ -140,7 +142,7 @@
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Projects (Billed)</div>
+                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">My Projects (Billed)</div>
                       <div class="h5 mb-0 font-weight-bold text-gray-800" id="project-count-billed">0</div>
                     </div>
                     <div class="col-auto">
@@ -157,7 +159,7 @@
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Projects (Pending)</div>
+                      <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">My Projects (Pending)</div>
                       <div class="h5 mb-0 font-weight-bold text-gray-800" id="project-count-active">0</div>
                     </div>
                     <div class="col-auto">
@@ -230,7 +232,6 @@
 
   <script>
     var name = get_active_name();
-    console.log("name :", name);
 
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name()+" - Home";

@@ -162,7 +162,6 @@
 
   <script>
     var name = get_active_name();
-    console.log("name :", name);
 
     // FILLING PAGE
     document.getElementById("main-title").innerText = get_app_name()+" - Downloads";
@@ -196,7 +195,6 @@
         var obj = data[i];
         var id_core=obj;
         var link = get_api_uri()+"/project/download?name="+projectname+"&file="+obj;
-        console.log(link);
         var row = `<tr>`;
         row += `<td><a href="`+link+`">`+obj+`</a></td>`;
         row += `</tr>`;
@@ -214,7 +212,6 @@
         }
         var res = await api_get("/project/downloads?name="+projectname+"&username="+creator);
         var datajs = await res.json();
-        console.log("DATAJS :", datajs);
         if (datajs["status"]!=="success"){
           alert(datajs["message"]);
         }else{
@@ -228,7 +225,7 @@
 
     async function fetch_and_fill_progress(){
       // performs one fetch and update cycle
-      let res = await api_get("/project/progress?name="+projectname+"&creator="+creator);
+      let res = await api_get("/project/progress?name="+projectname+"&username="+creator);
       let datajs = await res.json();
       var progress=0;
       var total=1;
